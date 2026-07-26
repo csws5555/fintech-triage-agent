@@ -1,0 +1,141 @@
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python packaging and build output
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Python tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# Test and coverage output
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# Logs
+*.log
+
+
+# ============================================================
+# Environment variables and local secrets
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+
+# ============================================================
+# Jupyter
+# ============================================================
+
+.ipynb_checkpoints/
+
+
+# ============================================================
+# Machine learning models and checkpoints
+# ============================================================
+
+backend/saved_models/
+
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+
+# ============================================================
+# Local databases and generated RAG data
+# ============================================================
+
+backend/app/data/chromadb_store/
+backend/app/data/chromadb_store_tmp/
+backend/app/data/chromadb_store_backup/
+
+# Ignore local Ollama data only if it is accidentally created
+# inside the repository
+.ollama/
+
+
+# ============================================================
+# Frontend — React / Vite
+# ============================================================
+
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
+
+# General Node.js output
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local frontend environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+
+# ============================================================
+# IDE and editor settings
+# ============================================================
+
+.vscode/
+.idea/
+
+*.swp
+*.swo
+*~
+.vs/
+
+
+# ============================================================
+# Operating-system files
+# ============================================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+
+# ============================================================
+# Temporary files
+# ============================================================
+
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.cache
