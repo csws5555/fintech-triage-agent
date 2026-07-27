@@ -139,3 +139,11 @@ temp/
 *.temp
 *.bak
 *.cache
+
+# Phase 2 temporary Chroma stores
+backend/app/data/chromadb_store_tmp/
+backend/app/data/chromadb_store_backup/
+
+# Test and runtime output
+.pytest_cache/
+*.log
