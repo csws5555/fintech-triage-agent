@@ -1,0 +1,526 @@
+{
+  "schema_version": 1,
+  "thresholds": [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50],
+  "cases": [
+    {
+      "id": "RAG-CAL-001",
+      "split": "calibration",
+      "query": "My card was stolen in London.",
+      "predictions": [
+        {"label": "lost_or_stolen_card", "confidence": 0.5324},
+        {"label": "compromised_card", "confidence": 0.0988},
+        {"label": "card_arrival", "confidence": 0.0701}
+      ],
+      "uncertain": true,
+      "top_two_margin": 0.4336,
+      "router_categories": ["supported_intent", "security_override"],
+      "expected_route": {
+        "risk_level": "high",
+        "action": "urgent_guidance",
+        "allowed_policy_ids": ["fraud_policy", "card_replacement"],
+        "required_policy_ids": ["fraud_policy", "card_replacement"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["fraud_policy", "card_replacement"],
+        "required_policy_ids": ["fraud_policy", "card_replacement"],
+        "expected_policy_ids": ["fraud_policy", "card_replacement"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-002",
+      "split": "calibration",
+      "query": "I do not recognize this cash withdrawal.",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.60},
+        {"label": "cash_withdrawal_charge", "confidence": 0.10},
+        {"label": "card_arrival", "confidence": 0.05}
+      ],
+      "uncertain": true,
+      "top_two_margin": 0.50,
+      "router_categories": ["security_override"],
+      "expected_route": {
+        "risk_level": "high",
+        "action": "urgent_guidance",
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"],
+        "expected_policy_ids": ["fraud_policy"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-003",
+      "split": "calibration",
+      "query": "My first physical card has not arrived.",
+      "predictions": [
+        {"label": "card_arrival", "confidence": 0.82},
+        {"label": "card_delivery_estimate", "confidence": 0.10},
+        {"label": "mortgage_info", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.72,
+      "router_categories": ["supported_intent", "delivery_distinction"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "generate",
+        "allowed_policy_ids": ["card_delivery"],
+        "required_policy_ids": ["card_delivery"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_delivery"],
+        "required_policy_ids": ["card_delivery"],
+        "expected_policy_ids": ["card_delivery"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-004",
+      "split": "calibration",
+      "query": "My replacement card has not arrived.",
+      "predictions": [
+        {"label": "card_arrival", "confidence": 0.81},
+        {"label": "lost_or_stolen_card", "confidence": 0.03},
+        {"label": "card_delivery_estimate", "confidence": 0.02}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.78,
+      "router_categories": ["supported_intent", "delivery_distinction"],
+      "expected_route": {
+        "risk_level": "medium",
+        "action": "generate",
+        "allowed_policy_ids": ["card_replacement"],
+        "required_policy_ids": ["card_replacement"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_replacement"],
+        "required_policy_ids": ["card_replacement"],
+        "expected_policy_ids": ["card_replacement"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-005",
+      "split": "calibration",
+      "query": "The foreign ATM added a fee.",
+      "predictions": [
+        {"label": "cash_withdrawal_charge", "confidence": 0.84},
+        {"label": "transfer_fee_charged", "confidence": 0.08},
+        {"label": "mortgage_info", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.76,
+      "router_categories": ["supported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "generate",
+        "allowed_policy_ids": ["international_fees"],
+        "required_policy_ids": ["international_fees"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["international_fees"],
+        "required_policy_ids": ["international_fees"],
+        "expected_policy_ids": ["international_fees"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-006",
+      "split": "calibration",
+      "query": "Why was I charged an extra fee abroad?",
+      "predictions": [
+        {"label": "cash_withdrawal_charge", "confidence": 0.80},
+        {"label": "transfer_fee_charged", "confidence": 0.10},
+        {"label": "mortgage_info", "confidence": 0.04}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.70,
+      "router_categories": ["fee_clarification"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "clarify",
+        "allowed_policy_ids": ["international_fees"],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": false,
+        "allowed_policy_ids": [],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-007",
+      "split": "calibration",
+      "query": "What mortgage rate can I receive?",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.88},
+        {"label": "cash_withdrawal_charge", "confidence": 0.04},
+        {"label": "card_arrival", "confidence": 0.02}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.84,
+      "router_categories": ["unsupported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "unsupported",
+        "allowed_policy_ids": [],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_delivery", "card_replacement", "fraud_policy", "international_fees"],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": true
+      }
+    },
+    {
+      "id": "RAG-CAL-008",
+      "split": "calibration",
+      "query": "My virtual card does not work.",
+      "predictions": [
+        {"label": "virtual_card_not_working", "confidence": 0.86},
+        {"label": "cash_withdrawal_charge", "confidence": 0.05},
+        {"label": "card_arrival", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.81,
+      "router_categories": ["unsupported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "unsupported",
+        "allowed_policy_ids": [],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_delivery", "card_replacement", "fraud_policy", "international_fees"],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": true
+      }
+    },
+    {
+      "id": "RAG-CAL-009",
+      "split": "calibration",
+      "query": "I was charged twice for the same card purchase.",
+      "predictions": [
+        {"label": "transaction_charged_twice", "confidence": 0.83},
+        {"label": "card_payment_not_recognised", "confidence": 0.08},
+        {"label": "mortgage_info", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.75,
+      "router_categories": ["supported_intent"],
+      "expected_route": {
+        "risk_level": "medium",
+        "action": "generate",
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"],
+        "expected_policy_ids": ["fraud_policy"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-CAL-010",
+      "split": "calibration",
+      "query": "Someone changed my email and I cannot log in.",
+      "predictions": [
+        {"label": "cash_withdrawal_charge", "confidence": 0.60},
+        {"label": "mortgage_info", "confidence": 0.10},
+        {"label": "card_arrival", "confidence": 0.05}
+      ],
+      "uncertain": true,
+      "top_two_margin": 0.50,
+      "router_categories": ["security_override"],
+      "expected_route": {
+        "risk_level": "critical",
+        "action": "human_escalation",
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"]
+      },
+      "retrieval": {
+        "attempt": false,
+        "allowed_policy_ids": [],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-001",
+      "split": "evaluation",
+      "query": "I lost my bank card while travelling.",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.55},
+        {"label": "cash_withdrawal_charge", "confidence": 0.12},
+        {"label": "card_arrival", "confidence": 0.06}
+      ],
+      "uncertain": true,
+      "top_two_margin": 0.43,
+      "router_categories": ["supported_intent", "security_override"],
+      "expected_route": {
+        "risk_level": "high",
+        "action": "urgent_guidance",
+        "allowed_policy_ids": ["fraud_policy", "card_replacement"],
+        "required_policy_ids": ["fraud_policy", "card_replacement"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["fraud_policy", "card_replacement"],
+        "required_policy_ids": ["fraud_policy", "card_replacement"],
+        "expected_policy_ids": ["fraud_policy", "card_replacement"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-002",
+      "split": "evaluation",
+      "query": "There is a card payment I do not recognize.",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.58},
+        {"label": "card_arrival", "confidence": 0.12},
+        {"label": "cash_withdrawal_charge", "confidence": 0.05}
+      ],
+      "uncertain": true,
+      "top_two_margin": 0.46,
+      "router_categories": ["security_override"],
+      "expected_route": {
+        "risk_level": "high",
+        "action": "urgent_guidance",
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["fraud_policy"],
+        "required_policy_ids": ["fraud_policy"],
+        "expected_policy_ids": ["fraud_policy"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-003",
+      "split": "evaluation",
+      "query": "When should my newly ordered bank card arrive?",
+      "predictions": [
+        {"label": "card_delivery_estimate", "confidence": 0.79},
+        {"label": "card_arrival", "confidence": 0.12},
+        {"label": "mortgage_info", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.67,
+      "router_categories": ["supported_intent", "delivery_distinction"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "generate",
+        "allowed_policy_ids": ["card_delivery"],
+        "required_policy_ids": ["card_delivery"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_delivery"],
+        "required_policy_ids": ["card_delivery"],
+        "expected_policy_ids": ["card_delivery"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-004",
+      "split": "evaluation",
+      "query": "The replacement card still has not arrived.",
+      "predictions": [
+        {"label": "card_arrival", "confidence": 0.78},
+        {"label": "card_delivery_estimate", "confidence": 0.11},
+        {"label": "mortgage_info", "confidence": 0.04}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.67,
+      "router_categories": ["supported_intent", "delivery_distinction"],
+      "expected_route": {
+        "risk_level": "medium",
+        "action": "generate",
+        "allowed_policy_ids": ["card_replacement"],
+        "required_policy_ids": ["card_replacement"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_replacement"],
+        "required_policy_ids": ["card_replacement"],
+        "expected_policy_ids": ["card_replacement"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-005",
+      "split": "evaluation",
+      "query": "Why did the cash machine charge me while I was overseas?",
+      "predictions": [
+        {"label": "cash_withdrawal_charge", "confidence": 0.82},
+        {"label": "transfer_fee_charged", "confidence": 0.09},
+        {"label": "mortgage_info", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.73,
+      "router_categories": ["supported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "clarify",
+        "allowed_policy_ids": ["international_fees"],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": false,
+        "allowed_policy_ids": [],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-006",
+      "split": "evaluation",
+      "query": "An extra international fee appeared on my account.",
+      "predictions": [
+        {"label": "extra_charge_on_statement", "confidence": 0.76},
+        {"label": "cash_withdrawal_charge", "confidence": 0.12},
+        {"label": "mortgage_info", "confidence": 0.04}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.64,
+      "router_categories": ["fee_clarification"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "clarify",
+        "allowed_policy_ids": ["international_fees"],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": false,
+        "allowed_policy_ids": [],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-007",
+      "split": "evaluation",
+      "query": "Can you approve a home loan for me?",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.91},
+        {"label": "card_arrival", "confidence": 0.03},
+        {"label": "cash_withdrawal_charge", "confidence": 0.02}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.88,
+      "router_categories": ["unsupported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "unsupported",
+        "allowed_policy_ids": [],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_delivery", "card_replacement", "fraud_policy", "international_fees"],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": true
+      }
+    },
+    {
+      "id": "RAG-EVAL-008",
+      "split": "evaluation",
+      "query": "How can I buy cryptocurrency in this app?",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.82},
+        {"label": "virtual_card_not_working", "confidence": 0.08},
+        {"label": "beneficiary_not_allowed", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.74,
+      "router_categories": ["unsupported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "unsupported",
+        "allowed_policy_ids": [],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_delivery", "card_replacement", "fraud_policy", "international_fees"],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": true
+      }
+    },
+    {
+      "id": "RAG-EVAL-009",
+      "split": "evaluation",
+      "query": "My card's chip is broken.",
+      "predictions": [
+        {"label": "card_arrival", "confidence": 0.62},
+        {"label": "mortgage_info", "confidence": 0.14},
+        {"label": "cash_withdrawal_charge", "confidence": 0.06}
+      ],
+      "uncertain": true,
+      "top_two_margin": 0.48,
+      "router_categories": ["supported_intent"],
+      "expected_route": {
+        "risk_level": "medium",
+        "action": "generate",
+        "allowed_policy_ids": ["card_replacement", "card_delivery"],
+        "required_policy_ids": ["card_replacement"]
+      },
+      "retrieval": {
+        "attempt": true,
+        "allowed_policy_ids": ["card_replacement", "card_delivery"],
+        "required_policy_ids": ["card_replacement"],
+        "expected_policy_ids": ["card_replacement"],
+        "unsupported_probe": false
+      }
+    },
+    {
+      "id": "RAG-EVAL-010",
+      "split": "evaluation",
+      "query": "What interest rate is available on a savings account?",
+      "predictions": [
+        {"label": "mortgage_info", "confidence": 0.84},
+        {"label": "beneficiary_not_allowed", "confidence": 0.07},
+        {"label": "cash_withdrawal_amount", "confidence": 0.03}
+      ],
+      "uncertain": false,
+      "top_two_margin": 0.77,
+      "router_categories": ["unsupported_intent"],
+      "expected_route": {
+        "risk_level": "low",
+        "action": "unsupported",
+        "allowed_policy_ids": [],
+        "required_policy_ids": []
+      },
+      "retrieval": {
+        "attempt": false,
+        "allowed_policy_ids": [],
+        "required_policy_ids": [],
+        "expected_policy_ids": [],
+        "unsupported_probe": false
+      }
+    }
+  ]
+}

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from langchain_chroma import Chroma
 
 from app.ml.embeddings import get_embeddings
 from app.ml.ingest_policies import (
@@ -13,6 +14,8 @@ from app.ml.ingest_policies import (
     verify_vector_store,
 )
 from app.ml.rag_config import settings
+from app.ml.retriever import PolicyRetriever
+from app.ml.triage_types import TriageDecision
 
 
 @pytest.mark.integration
@@ -66,3 +69,59 @@ def test_live_nomic_temporary_chroma_build_and_reopen(
     assert manifest.embedding_dimensions == result.embedding_dimensions
     assert manifest.source_document_count == 4
     assert manifest.chunk_count == result.chunk_count
+
+    vector_store = Chroma(
+        collection_name=settings.collection_name,
+        embedding_function=embeddings,
+        persist_directory=str(paths.active),
+        create_collection_if_not_exists=False,
+    )
+    retriever = PolicyRetriever(
+        vector_store=vector_store,
+        manifest=manifest,
+        embedding_model_digest=manifest.embedding_model_digest,
+    )
+    similar = retriever.retrieve(
+        query="When should my newly ordered bank card arrive?",
+        allowed_policy_ids=("card_delivery",),
+        required_policy_ids=("card_delivery",),
+    )
+    unrelated = retriever.retrieve(
+        query="How do I report an unrecognized cash withdrawal?",
+        allowed_policy_ids=("card_delivery",),
+    )
+
+    assert similar
+    assert unrelated
+    assert len(similar) <= settings.max_context_chunks
+    assert len(unrelated) <= settings.max_context_chunks
+    assert max(
+        policy.relevance_score
+        for policy in similar
+    ) > max(
+        policy.relevance_score
+        for policy in unrelated
+    )
+
+    decision = TriageDecision(
+        risk_level="low",
+        action="generate",
+        candidate_intents=(
+            "card_arrival",
+            "card_delivery_estimate",
+            "mortgage_info",
+        ),
+        routing_intents=(
+            "card_arrival",
+            "card_delivery_estimate",
+        ),
+        allowed_policy_ids=("card_delivery",),
+        required_policy_ids=("card_delivery",),
+        security_signals=(),
+        requires_human=False,
+        reason_code="supported_policy_generation",
+    )
+    assert retriever.retrieval_is_sufficient(
+        similar,
+        decision,
+    )
