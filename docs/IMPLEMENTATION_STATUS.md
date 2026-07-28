@@ -12,8 +12,8 @@ Status vocabulary:
 
 Phase 2 — Safe Local RAG and Triage Orchestration.
 
-The repository implementation is complete through Step 21. The next incomplete
-roadmap step is Step 22, grounding-prompt construction.
+The repository implementation is complete through Step 25. The next incomplete
+roadmap step is Step 26, validated buffered streaming.
 
 Roadmap source:
 
@@ -45,7 +45,11 @@ Roadmap source:
 | 19 — Determine retrieval sufficiency | `COMPLETE_AND_VERIFIED` | The boolean sufficiency gate fails closed for empty, unsafe, disallowed, incomplete, conflicting, stale-manifest, and over-limit contexts; valid scoped retrieval passes focused, full, live temporary-store, and active-store checks. |
 | 20 — Calibrate retrieval threshold | `COMPLETE_AND_VERIFIED` | A strictly validated 10/10 calibration/locked split evaluates all seven roadmap thresholds, reports router and retriever metrics separately, selects `0.50` using calibration cases only, and confirms the selection once against the locked split. |
 | 21 — Create local chat model | `COMPLETE_AND_VERIFIED` | Lazy `ChatOllama` construction revalidates allowlisted loopback settings, applies every configured runtime limit, validates the provider interface, caches one client, and passes fake-based and live initialization checks. |
-| 22–35 | `NOT_STARTED` | Prompting, structured generation, validation, pipeline, expanded evaluation, and logging are not implemented. |
+| 22 — Build grounding prompt | `COMPLETE_AND_VERIFIED` | Deterministic system/human messages isolate trusted rules from JSON-encoded untrusted data, expose only safe route/chunk fields, and fail closed for unsafe routes, incomplete or invalid context, duplicates, version conflicts, limits, and local paths. |
+| 23 — Use structured internal output | `COMPLETE_AND_VERIFIED` | The approved local model is bound to `GeneratedSupportResponse`; generation retries once with stricter formatting and identical context, then returns only an approved fallback and stable internal failure code. Fake-based and live loopback-Ollama tests pass. |
+| 24 — Create output validation | `COMPLETE_AND_VERIFIED` | Deterministic validation inspects answer text and structured flags, aggregates every applicable ordered failure code, distinguishes safety warnings/negations from unsafe requests and claims, enforces stolen-card concepts, and never returns rejected text. |
+| 25 — Implement orchestration pipeline | `COMPLETE_AND_VERIFIED` | The lazy dependency-injected synchronous pipeline enforces route order, required policy scope, sufficiency, deterministic urgent handling, bounded structured generation, output validation, safe fallbacks, and typed metadata. Focused fake and real-router seam tests pass. |
+| 26–35 | `NOT_STARTED` | Validated streaming, expanded evaluation, frontend integration, and logging are not implemented. |
 
 No roadmap step is currently `PARTIAL` or `BLOCKED`.
 
@@ -64,6 +68,10 @@ Core modules:
 - `backend/app/ml/embeddings.py`
 - `backend/app/ml/retriever.py`
 - `backend/app/ml/chat_model.py`
+- `backend/app/ml/grounding_prompt.py`
+- `backend/app/ml/structured_generation.py`
+- `backend/app/ml/output_validator.py`
+- `backend/app/ml/rag_pipeline.py`
 
 Policies:
 
@@ -94,6 +102,11 @@ Tests:
 - `backend/tests/test_calibrate_retrieval.py`
 - `backend/tests/test_chat_model.py`
 - `backend/tests/test_chat_model_integration.py`
+- `backend/tests/test_grounding_prompt.py`
+- `backend/tests/test_structured_generation.py`
+- `backend/tests/test_structured_generation_integration.py`
+- `backend/tests/test_output_validator.py`
+- `backend/tests/test_rag_pipeline.py`
 - `backend/tests/data/rag_evaluation_cases.json`
 
 ## Important public interfaces
@@ -146,12 +159,36 @@ Tests:
 - `app.ml.chat_model.ChatModelInitializationError`
 - `app.ml.chat_model.build_chat_model(...)`
 - `app.ml.chat_model.get_chat_model()`
+- `app.ml.grounding_prompt.GroundingPromptError`
+- `app.ml.grounding_prompt.SYSTEM_GROUNDING_RULES`
+- `app.ml.grounding_prompt.build_grounding_prompt(...) -> tuple[SystemMessage, HumanMessage]`
+- `app.ml.structured_generation.StructuredGenerationResult`
+- `app.ml.structured_generation.generate_structured_response(...) -> StructuredGenerationResult`
+- `app.ml.structured_generation.STRUCTURED_GENERATION_INPUT_INVALID`
+- `app.ml.structured_generation.STRUCTURED_GENERATION_UNAVAILABLE`
+- `app.ml.structured_generation.STRUCTURED_GENERATION_FAILED`
+- `app.ml.output_validator.OutputValidator`
+- `app.ml.output_validator.output_validator`
+- `app.ml.output_validator.INVALID_VALIDATION_INPUT`
+- `app.ml.output_validator.EMPTY_OUTPUT`
+- `app.ml.output_validator.RESPONSE_TOO_LONG`
+- `app.ml.output_validator.SENSITIVE_DATA_REQUEST`
+- `app.ml.output_validator.UNVERIFIED_COMPLETED_ACTION`
+- `app.ml.output_validator.UNSUPPORTED_GUARANTEE`
+- `app.ml.output_validator.MISSING_REQUIRED_SAFETY_CONTENT`
+- `app.ml.output_validator.INTERNAL_INFORMATION_LEAK`
+- `app.ml.output_validator.INSUFFICIENT_POLICY`
+- `app.ml.rag_pipeline.FintechRagPipeline`
+- `app.ml.rag_pipeline.rag_pipeline`
+- Stable failure/fallback reason constants exported by
+  `app.ml.rag_pipeline`
 - `app.ml.risk_router.RiskRouter.route_message(...) -> TriageDecision`
 - `app.ml.risk_router.risk_router`
 - Pydantic contracts in `app.ml.triage_types`
-- deterministic functions exported by `app.ml.response_templates`
+- Deterministic functions exported by `app.ml.response_templates`, including
+  negated-security, compromised-card, and unrecognized-transaction responses
 
-Step 22 must build on these interfaces or deliberately document and test any
+Step 26 must build on these interfaces or deliberately document and test any
 required compatibility change.
 
 ## Latest baseline commands actually run
@@ -160,14 +197,15 @@ Working directory: `backend/`
 
 | Command | Status | Exact result |
 | --- | --- | --- |
-| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Exit code 0; Step 21 source and all application, script, and test directories compiled. |
-| `python -m pytest -q tests/test_chat_model.py` | `COMPLETE_AND_VERIFIED` | `7 passed in 13.10s`; exit code 0. |
-| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` | `199 passed, 2 deselected in 36.58s`; exit code 0. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Exit code 0; Step 25 source and all application, script, and test directories compiled. |
+| `python -m pytest -q tests/test_rag_pipeline.py` | `COMPLETE_AND_VERIFIED` | `57 passed in 9.22s`; exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` | `384 passed, 3 deselected in 15.68s`; exit code 0. |
 | `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` | Four policy files reported `PASS`; `4 approved policy files validated.`; exit code 0. |
 | `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` | Five model artifacts reported `PASS`; `5 Phase 1 model artifacts match the protected baseline.`; exit code 0. |
 | `python -m pip check` | `COMPLETE_AND_VERIFIED` | `No broken requirements found.`; exit code 0. |
 | `python scripts/calibrate_retrieval.py` | `COMPLETE_AND_VERIFIED` | Exit code 0; selected `0.50` on ten calibration cases and reported once on ten locked evaluation cases. Both router splits were 100%; supported retrieval hit, Recall@4, and required-family coverage were 100%, with zero false fallback and false-positive policy rate. |
-| `python -m pytest -q -m integration` | `COMPLETE_AND_VERIFIED` | `2 passed, 199 deselected, 3 warnings in 47.42s`; exit code 0. The approved chat model initialized through loopback Ollama, and live Nomic/temporary-Chroma verification passed. The warnings were Chroma's legacy embedding-function configuration deprecation warning. |
+| `python -m pytest -q tests/test_structured_generation_integration.py -m integration` | `COMPLETE_AND_VERIFIED` | `1 passed in 21.86s`; exit code 0. The configured loopback `llama3.2:3b` returned the required typed schema without fallback. |
+| `python -m pytest -q -m integration` | `COMPLETE_AND_VERIFIED` | `3 passed, 384 deselected, 3 warnings in 26.98s`; exit code 0. Existing initialization, temporary-Chroma, and structured-generation regressions passed. The warnings were Chroma's legacy embedding-function configuration deprecation warning. |
 | Initialization-only `get_chat_model()` smoke command | `COMPLETE_AND_VERIFIED` | Exit code 0; the approved configured `llama3.2:3b` model initialized with provider validation enabled. No generation prompt was sent. |
 | Threshold consistency check | `COMPLETE_AND_VERIFIED` | Exit code 0; `.env.example` and the ignored local runtime environment each contain exactly one calibrated threshold entry. |
 
@@ -180,6 +218,16 @@ Working directory: `backend/`
 - The lazy Step 21 chat adapter initialized the installed local
   `llama3.2:3b` model through the approved loopback endpoint without sending a
   generation prompt.
+- Step 22 prompt construction is pure and did not contact Ollama, Chroma, or
+  the protected classifier.
+- Step 23 bound the configured loopback `llama3.2:3b` model to
+  `GeneratedSupportResponse` and completed a real structured generation
+  without fallback. It did not access Chroma or the protected classifier.
+- Step 24 validation is pure and did not contact Ollama, Chroma, or the
+  protected classifier.
+- Step 25 unit tests injected fake retrieval/model/validation components and
+  used the real deterministic router at service-free seams. Default pipeline
+  construction and deterministic branches do not resolve Ollama or Chroma.
 - Chroma build, staged activation, reopen, metadata, count, cosine, and
   retrieval checks passed in a pytest temporary directory.
 - Step 17's real Nomic/Chroma smoke check proved a semantically similar
@@ -220,9 +268,11 @@ Working directory: `backend/`
   unsupported requests from reaching retrieval.
 - The Step 20 dataset has 20 cases for threshold selection and locked
   verification. Step 29 still requires the broader 40–50-case evaluation set.
-- Step 21 validates model availability and configuration only. Prompt
-  construction, structured generation, and output safety remain gated on
-  Steps 22–24.
+- Step 24 checks explicit roadmap language patterns and structured flags.
+  Regex validation is conservative rather than full semantic understanding;
+  Step 29's expanded adversarial evaluation should add observed paraphrases.
+- Step 25's complete branch orchestration is fake-verified, but the broader
+  real-query end-to-end pipeline suite remains scheduled for Step 31.
 - Callers that need required-policy diversity must pass
   `required_policy_ids`; the argument is optional only to preserve Step 17
   compatibility. The future orchestration pipeline must pass the router's
@@ -241,7 +291,7 @@ Working directory: `backend/`
 
 ## Next incomplete step
 
-Step 22 — Build the grounding prompt. Create or continue an execution
+Step 26 — Add validated buffered streaming. Create or continue an execution
 plan from:
 
 `personal project documentation/phase 2 steps.md`

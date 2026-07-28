@@ -114,6 +114,17 @@ def unverified_action_status_response() -> str:
     )
 
 
+def negated_security_incident_response() -> str:
+    """Acknowledge that the customer is not reporting an incident."""
+
+    return (
+        "I understand that you are not reporting a lost, stolen, "
+        "or compromised card. No security action is implied by this "
+        "prototype response. If you have a different card question, "
+        "please describe what you need help with."
+    )
+
+
 def account_operation_limitation_response() -> str:
     """Explain that the prototype cannot execute account operations."""
 
@@ -273,11 +284,61 @@ def unrecognized_withdrawal_response(*, requires_human: bool) -> str:
     return message
 
 
+def unrecognized_transaction_response(
+    *,
+    requires_human: bool,
+) -> str:
+    """Return reviewed guidance for an unrecognized card payment."""
+
+    message = (
+        "Review the merchant name, transaction date, amount, and "
+        "status, and check whether an authorized cardholder, "
+        "subscription, or digital wallet explains the payment. If "
+        "you still do not recognize it, freeze the affected card in "
+        "the app, review your other recent transactions, and report "
+        "the payment through the approved fraud-reporting process. "
+        "A refund or reversal cannot be guaranteed. "
+    )
+
+    if requires_human:
+        message += "Contact emergency support now for human assistance."
+    else:
+        message += (
+            "Contact emergency support if you cannot access the app "
+            "or if unauthorized activity is continuing."
+        )
+
+    return message
+
+
+def compromised_card_response(*, requires_human: bool) -> str:
+    """Return reviewed guidance for suspected card compromise."""
+
+    message = (
+        "Freeze the affected card in the app, review recent payments "
+        "and withdrawals, and report any transaction you do not "
+        "recognize. You can request a replacement through the app or "
+        "support process, but this prototype cannot place the request "
+        "or confirm that the card has been secured. "
+    )
+
+    if requires_human:
+        message += "Contact emergency support now for human assistance."
+    else:
+        message += (
+            "Contact emergency support if you cannot access the app "
+            "or cannot secure the card yourself."
+        )
+
+    return message
+
+
 __all__ = [
     "account_operation_limitation_response",
     "atm_retained_card_response",
     "card_delivery_clarification",
     "classifier_uncertainty_clarification",
+    "compromised_card_response",
     "critical_account_access_response",
     "damaged_card_replacement_response",
     "hypothetical_stolen_card_response",
@@ -286,9 +347,11 @@ __all__ = [
     "international_fee_clarification",
     "login_problem_clarification",
     "minimum_stolen_card_response",
+    "negated_security_incident_response",
     "pin_or_passcode_clarification",
     "replacement_card_guidance",
     "unrecognized_withdrawal_response",
+    "unrecognized_transaction_response",
     "unsupported_policy_response",
     "unverified_action_status_response",
 ]
