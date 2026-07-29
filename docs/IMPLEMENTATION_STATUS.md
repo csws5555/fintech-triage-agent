@@ -10,17 +10,17 @@ Status vocabulary:
 
 ## Current phase
 
-Phase 2 — Safe Local RAG and Triage Orchestration — complete and verified.
+Phase 3 — FastAPI Backend Integration — active.
 
-The repository implementation is complete through Step 35. No Phase 2 roadmap
-step remains incomplete; the next project phase is Phase 3 backend API
-integration.
+Phase 2 remains complete and verified through Step 35. Phase 3 Steps 1–4 are
+complete and verified; Step 5 is the next incomplete roadmap step.
 
-Roadmap source:
+Roadmap sources:
 
-`personal project documentation/phase 2 steps.md`
+- `personal project documentation/phase 2 steps.md`
+- `personal project documentation/phase 3 steps.md`
 
-## Roadmap status
+## Phase 2 roadmap status
 
 | Step | Status | Repository evidence |
 | --- | --- | --- |
@@ -61,12 +61,104 @@ Roadmap source:
 | 34 — Safe logging and redaction | `COMPLETE_AND_VERIFIED` | The service-free redactor covers every roadmap secret family, confidence values are bucketed, structured log records reject non-allowlisted fields and unsafe values, and 54 focused tests pass. |
 | 35 — Phase 2 execution order | `COMPLETE_AND_VERIFIED` | The ordered deterministic, Ollama, policy, staged rebuild, store inspection, retrieval, calibration, complete test, live pipeline, exact matrix, locked quality, and Phase 3 handoff checks pass. |
 
+## Phase 3 roadmap status
+
+| Step | Status | Repository evidence |
+| --- | --- | --- |
+| 1 — Dependencies, configuration, and execution tracking | `COMPLETE_AND_VERIFIED` | FastAPI and Starlette are exact direct pins; immutable API settings validate the explicit backend environment, numeric limits, API prefix, request-body headroom, log levels, and restrictive exact CORS origins. Seventy-one focused tests and the full 610-test non-integration suite pass. |
+| 2 — Safe HTTP, health, error, and SSE contracts | `COMPLETE_AND_VERIFIED` | Strict API-only request, chat, error, liveness, readiness, and SSE payloads reuse Phase 2 enums and limits without exposing internal answers. All 38 focused tests and the 648-test non-integration suite pass. |
+| 3 — Shared services and bounded execution | `COMPLETE_AND_VERIFIED` | One per-application service container and bounded executor run the classifier-plus-pipeline job off the event loop. Queue and execution timeouts, cancellation-safe capacity retention, concurrency bounds, stable service exceptions, instance reuse, and orderly shutdown pass focused tests. |
+| 4 — Application factory and lifespan | `COMPLETE_AND_VERIFIED` | `create_app(...)` owns one lifespan-initialized `AppServices` container, eagerly warms the classifier, validates the manifest/store without embedding, bounds optional local-client initialization, degrades safely, exposes typed dependencies, and closes/removes API-owned state at shutdown. |
+| 5 — Health and readiness endpoints | `NOT_STARTED` | No API routes have been added. |
+| 6 — Request controls, CORS, IDs, and logging | `NOT_STARTED` | No API middleware has been added. |
+| 7 — Error translation | `NOT_STARTED` | No API error handlers have been added. |
+| 8 — Normal chat endpoint | `NOT_STARTED` | No customer HTTP endpoint has been added. |
+| 9 — Buffered SSE endpoint | `NOT_STARTED` | No streaming HTTP endpoint has been added. |
+| 10 — Lifecycle, health, configuration, and OpenAPI tests | `NOT_STARTED` | Later API test coverage is not in scope yet. |
+| 11 — Validation, security, CORS, concurrency, and leakage tests | `NOT_STARTED` | Later API test coverage is not in scope yet. |
+| 12 — Timeout, cancellation, and disconnect behavior | `NOT_STARTED` | Transport cancellation behavior is not in scope yet. |
+| 13 — Real API integration coverage and local runner | `NOT_STARTED` | No runner or API integration test has been added. |
+| 14 — Final verification and Phase 4 handoff | `NOT_STARTED` | Phase 3 is active. |
+
 No roadmap step is currently `PARTIAL` or `BLOCKED`.
+
+### Phase 3 Step 1 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_config.py` | `COMPLETE_AND_VERIFIED` — 71 passed. |
+| `python -m pytest -q tests/test_rag_config.py tests/test_api_config.py` | `COMPLETE_AND_VERIFIED` — 92 passed. |
+| `python -c "import fastapi, starlette, uvicorn, httpx; print('PASS API imports')"` | `COMPLETE_AND_VERIFIED` — printed `PASS API imports`. |
+| `python -c "from app.api.config import api_settings; print('PASS API settings import')"` | `COMPLETE_AND_VERIFIED` — explicit local configuration loaded and printed only the pass marker. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 610 passed, 3 deselected. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 1 required no live Ollama, Chroma, classifier inference, running
+FastAPI application, or integration test. None was run or accessed.
+
+### Phase 3 Step 2 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_models.py` | `COMPLETE_AND_VERIFIED` — 38 passed. |
+| `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` — the first sandboxed launch was denied before Python started; the approved rerun exited 0. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 648 passed, 3 deselected. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 2 required no live Ollama, Chroma, classifier inference, running
+FastAPI application, CORS behavior, lifecycle state, async execution, or
+integration test. None was run or accessed.
+
+### Phase 3 Step 3 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — 9 passed in 3.17s. |
+| `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q tests/test_api_config.py tests/test_api_models.py tests/test_api_services.py tests/test_async_streaming.py` | `COMPLETE_AND_VERIFIED` — 122 passed in 25.62s. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 657 passed, 3 deselected in 46.54s. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 3 used injected classifier and pipeline fakes. It required no live
+Ollama, Chroma, classifier inference, running FastAPI application, CORS,
+request route, SSE transport, or integration test. None was run or accessed.
+
+### Phase 3 Step 4 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m compileall app\api app\main.py tests\test_api_app.py` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q tests/test_api_app.py tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — final rerun: 17 passed in 33.79s. |
+| `python -m pytest -q tests/test_api_config.py tests/test_api_models.py tests/test_api_services.py tests/test_api_app.py tests/test_async_streaming.py` | `COMPLETE_AND_VERIFIED` — 130 passed in 36.93s. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — final rerun: 665 passed, 3 deselected in 24.44s. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 4 exercised the FastAPI lifespan in-process with a fully injected
+`ServiceBuilder`. It did not load the live classifier, contact Ollama, open the
+active Chroma store, run classifier inference, start a server, install CORS,
+register routes, or run integration tests.
 
 ## Presently implemented files
 
 Core modules:
 
+- `backend/app/api/config.py`
+- `backend/app/api/dependencies.py`
+- `backend/app/api/models.py`
+- `backend/app/api/services.py`
+- `backend/app/main.py`
 - `backend/app/ml/rag_config.py`
 - `backend/app/ml/triage_types.py`
 - `backend/app/ml/classifier.py`
@@ -83,6 +175,14 @@ Core modules:
 - `backend/app/ml/output_validator.py`
 - `backend/app/ml/redaction.py`
 - `backend/app/ml/rag_pipeline.py`
+
+Phase 3 focused tests and tracking:
+
+- `backend/tests/test_api_config.py`
+- `backend/tests/test_api_app.py`
+- `backend/tests/test_api_models.py`
+- `backend/tests/test_api_services.py`
+- `docs/plans/phase-3-backend-api.md`
 
 Policies:
 
@@ -137,6 +237,42 @@ Tests:
 
 ## Important public interfaces
 
+- `app.api.config.ApiSettings`
+- `app.api.config.api_settings`
+- `app.api.config.load_api_settings(...)`
+- `app.api.config.validate_api_settings(...)`
+- `app.api.models.PublicStatus`
+- `app.api.models.ChatRequest`
+- `app.api.models.ChatResponse`
+- `app.api.models.ErrorDetail`
+- `app.api.models.ErrorResponse`
+- `app.api.models.LivenessResponse`
+- `app.api.models.ReadinessComponents`
+- `app.api.models.ReadinessResponse`
+- `app.api.models.StreamMetadataEvent`
+- `app.api.models.StreamChunkEvent`
+- `app.api.models.StreamDoneEvent`
+- `app.api.models.StreamErrorEvent`
+- `app.api.models.public_status_for_pipeline_answer(...)`
+- `app.api.models.chat_response_from_pipeline_answer(...)`
+- `app.api.models.stream_metadata_from_chat_response(...)`
+- `app.api.services.ClassifierCallable`
+- `app.api.services.ServiceReadiness`
+- `app.api.services.ChatExecution`
+- `app.api.services.ApiChatService`
+- `app.api.services.AppServices`
+- `app.api.services.ApiServiceError`
+- `app.api.services.ServiceQueueTimeoutError`
+- `app.api.services.ServiceExecutionTimeoutError`
+- `app.api.services.ClassifierServiceError`
+- `app.api.services.PipelineServiceError`
+- `app.api.services.ServiceShuttingDownError`
+- `app.api.dependencies.get_app_services(...)`
+- `app.api.dependencies.get_chat_service(...)`
+- `app.main.ApplicationStartupError`
+- `app.main.ServiceBuilder`
+- `app.main.create_app(...)`
+- `app.main.app`
 - `app.ml.rag_config.RagSettings`
 - `app.ml.rag_config.settings`
 - `app.ml.rag_config.load_rag_settings(...)`
@@ -287,6 +423,11 @@ Working directory: `backend/`
 
 | Command | Status | Exact result |
 | --- | --- | --- |
+| `python -m pytest -q tests/test_api_models.py` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final focused run: `38 passed in 0.15s`; strict transport validation, readiness consistency, status mapping, and leakage assertions pass. |
+| `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` | The first sandboxed launch was denied before Python started; the approved rerun exited 0. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final run exited 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final run: `648 passed, 3 deselected in 17.81s`; exit code 0. |
+| Phase 3 Step 2 repository validation commands | `COMPLETE_AND_VERIFIED` | Protected baseline: 5 artifacts passed; policies: 4 passed; dependency check: no broken requirements. Live services and integration tests were not run because Step 2 is service-free. |
 | `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Step 35 initial run exited 0. The first final launch was sandbox-denied before Python started; the approved final rerun exited 0. |
 | `python -m pytest -q tests/test_redaction.py` | `COMPLETE_AND_VERIFIED` | `56 passed in 0.10s`; unlabeled invalid-checksum identifiers remain visible while contextual and checksum-valid card values are redacted. |
 | `python -m pytest -q tests/test_inspect_vector_store.py tests/test_redaction.py` | `COMPLETE_AND_VERIFIED` | `71 passed in 10.23s`; safe inspection output and redaction compatibility pass. |
@@ -494,30 +635,51 @@ Working directory: `backend/`
   and the complete rerun, 25-case matrix, and locked quality measurement all
   passed. Phase 3 must continue treating grounded generation as nondeterministic
   and preserve the existing validated fallback path.
-- The working tree contains extensive uncommitted Phase 2 work. Preserve it and
-  do not create a commit without explicit user instruction.
+- The Phase 3 roadmap source is currently an untracked user file. Preserve it
+  and do not create a commit without explicit user instruction.
 
 ## Next incomplete step
 
-No Phase 2 roadmap step remains incomplete. The next project phase is Phase 3
-backend API integration; it was not started during Step 35.
+Phase 3 Step 5 — add liveness and readiness endpoints.
 
 ## Compact continuation handoff
 
-- Completed boundary: all Phase 2 Steps 0–35 are
-  `COMPLETE_AND_VERIFIED`; Phase 3 is untouched.
-- Step 35 safely rebuilt and inspected the active 67-record store, retained the
-  calibrated `0.50` threshold, verified the complete local stack, fixed digest
-  disclosure in inspection output, and reduced numeric identifier
-  over-redaction.
-- Final verification: 56 redaction tests, 71 focused compatibility tests, 539
-  non-integration tests, all 542 tests, 3 explicit integrations, 7 live
-  pipeline probes, 25/25 exact matrix cases, and all locked quality goals
-  passed. Four policies, five protected model artifacts, Ollama health,
-  dependency integrity, live retrieval, store integrity, and Phase 3 handoff
-  interfaces passed.
-- Carry-forward risks: local LLM output can vary and Chroma 1.5.9 emits a
-  legacy embedding-function deprecation warning. Existing validation/fallback
-  behavior and pinned-version review must remain in Phase 3.
-- Begin Phase 3 from the documented classifier/pipeline interfaces; preserve
-  all uncommitted Phase 2 work, the protected model, and the active store.
+- Completed boundary: Phase 2 Steps 0–35 and Phase 3 Steps 1–4 are
+  `COMPLETE_AND_VERIFIED`.
+- Step 1 added `ApiSettings`, `load_api_settings(...)`,
+  `validate_api_settings(...)`, module-level `api_settings`, exact
+  `fastapi==0.140.13`/`starlette==1.3.1` pins, reviewed API environment
+  examples, focused tests, and the active Phase 3 execution plan.
+- Configuration is immutable and fail-closed. It reuses the explicit
+  `backend/.env` source with OS precedence and the Phase 2 maximum customer
+  message length without changing `RagSettings`.
+- Step 2 added strict API-only request, chat, error, liveness, readiness, and
+  buffered-SSE payloads plus safe `PipelineAnswer` status/response mappers.
+  Clients can submit only a normalized `message`; public serialization omits
+  reason, retrieval, confidence, prompt, and diagnostic state.
+- Final Step 2 verification: 38 focused contract tests and 648
+  non-integration tests passed. Dependency integrity, compilation, four
+  policies, and five protected model artifacts also passed.
+- Step 3 added `ServiceReadiness`, `ChatExecution`, `ApiChatService`,
+  `AppServices`, `ClassifierCallable`, and stable queue, execution, classifier,
+  pipeline, and shutdown exceptions. One per-application thread pool runs the
+  complete classifier-plus-pipeline job behind an async capacity gate.
+- Timeout and caller cancellation shield the worker and retain its capacity
+  slot until actual completion. Shutdown rejects new work, cancels queued
+  executor work, and waits for running work without clearing Phase 2 caches.
+- Final Step 3 verification: 9 focused service tests, 122 related tests, and
+  657 non-integration tests passed. Dependency integrity, compilation, four
+  policies, and five protected model artifacts also passed.
+- Step 4 added the `create_app(...)` factory, module-level `app`, frozen
+  `ServiceBuilder`, one lifespan-owned `AppServices` container, eager
+  classifier warming, structural manifest/store inspection, bounded optional
+  retriever/embedding/chat initialization, safe degraded readiness, typed
+  application-state dependencies, and executor/state cleanup at shutdown.
+- Final Step 4 verification: 17 focused lifecycle/service tests, 130 related
+  API/async tests, and 665 non-integration tests passed. Dependency integrity,
+  compilation, four policies, and five protected model artifacts also passed.
+- No live service, classifier inference, active Chroma access, CORS behavior,
+  route transport, running API process, or integration test was exercised.
+- Continue with Phase 3 Step 5 only; preserve the protected model, active
+  store, Phase 2 safety boundary, ignored local environment, and untracked
+  user-supplied Phase 3 roadmap.
