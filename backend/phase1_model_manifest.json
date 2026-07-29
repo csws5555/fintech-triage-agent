@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "description": "SHA-256 baseline captured before Phase 2 Step 13 for the protected Phase 1 DistilBERT classifier artifacts.",
+  "model_directory": "saved_models/distilbert_fintech_pt",
+  "recorded_at_phase2_step": 12,
+  "files": [
+    {
+      "name": "config.json",
+      "bytes": 6016,
+      "sha256": "9beb65bc7481342a54bba125a5730de18d6d22436a6fe542afca7c0cac71ed23"
+    },
+    {
+      "name": "model.safetensors",
+      "bytes": 268063276,
+      "sha256": "f7d5f78f16e2f5466c60af261a59cdfd9d5bd0d8e24d5f23ef1e700df40ed77e"
+    },
+    {
+      "name": "tokenizer.json",
+      "bytes": 711494,
+      "sha256": "79ea220416a57ca8acdf069d71875d5d2ddadef66021aeb6c120a7c546c04344"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "bytes": 366,
+      "sha256": "71cd48543bec670f50e0c9c3556df16b1f58ea720ead6a1b4675f08870c60b17"
+    },
+    {
+      "name": "training_args.bin",
+      "bytes": 5201,
+      "sha256": "3109a7373559a39e236e9c864a8578ff2b0e7a9ed6143ae526163c3f494afbc3"
+    }
+  ]
+}

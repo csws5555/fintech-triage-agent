@@ -1,0 +1,255 @@
+phase 2 flow chart
+
+CUSTOMER SUBMITS MESSAGE
+Example: “My card was stolen in London.”
+        |
+        v
+1. INPUT VALIDATION
+   - Confirm the input is text
+   - Remove unnecessary surrounding whitespace
+   - Reject empty messages
+   - Reject messages exceeding the maximum length
+        |
+        v
+2. INTENT CLASSIFICATION — DistilBERT
+   - Tokenize the customer message
+   - Truncate input to a maximum of 128 tokens
+   - Produce the top three Banking77 predictions
+   - Calculate:
+       • Top intent
+       • Confidence score
+       • Difference between first and second scores
+       • Uncertainty flag
+        |
+        v
+   Example result:
+   1. lost_or_stolen_card       0.53
+   2. compromised_card          0.10
+   3. card_arrival              0.07
+   uncertain = true
+        |
+        v
+3. DETERMINISTIC MESSAGE ANALYSIS
+   Examine the original customer text for direct signals:
+   - Stolen or lost card
+   - Unrecognized transaction
+   - Unrecognized cash withdrawal
+   - Account takeover
+   - Damaged card
+   - ATM-retained card
+   - Initial or replacement-card delivery
+   - International fees
+   - Duplicate charges
+   - Hidden-prompt or internal-information requests
+   - Requests to confirm completed account actions
+        |
+        v
+4. NEGATION AND HYPOTHETICAL CHECK
+   Distinguish between:
+   - “My card was stolen.”
+   - “My card was not stolen.”
+   - “What should I do if my card is stolen?”
+        |
+        v
+5. RISK ROUTING
+   Combine:
+   - Direct message signals
+   - Top classifier predictions
+   - Prediction confidence
+   - Prediction margin
+   - Supported-policy coverage
+        |
+        v
+   Produce a TRIAGE DECISION:
+   - Risk level
+   - Action
+   - Candidate intents
+   - Routing intents
+   - Allowed policies
+   - Required policies
+   - Security signals
+   - Human-support requirement
+   - Reason code
+        |
+        v
+6. SELECT RESPONSE PATH
+        |
+        +----------------------------------------------------+
+        |                    |                  |            |
+        v                    v                  v            v
+
+   A. CRITICAL          B. STATIC         C. CLARIFY    D. UNSUPPORTED
+   HUMAN ESCALATION     RESPONSE
+
+   Examples:             Examples:          Examples:      Examples:
+   - Account takeover    - Reveal prompt     - Vague fee    - Mortgage
+   - Unauthorized        - Print policies    - Vague PIN      question
+     contact changes     - “Has my card      - Unclear      - Investment
+   - Lost access plus      been frozen?”       delivery       advice
+     suspicious changes
+        |                    |                  |            |
+        v                    v                  v            v
+   Deterministic         Deterministic      Deterministic  Deterministic
+   emergency guidance    refusal/status     question       fallback
+                         explanation
+        |
+        |       No retrieval and no LLM for these routes
+        |
+        +----------------------------------------------------+
+
+                         OR
+
+        +----------------------------------------------------+
+        |                                                    |
+        v                                                    v
+
+   E. URGENT GUIDANCE                              F. NORMAL GENERATION
+   Examples:                                       Examples:
+   - Stolen card                                  - Foreign ATM fee
+   - Lost card                                    - Supported card delivery
+   - Unrecognized withdrawal                      - Supported international fee
+   - ATM-retained card                            - Other low/medium-risk query
+        |                                                    |
+        v                                                    v
+7. POLICY-SCOPE CHECK
+   Determine which approved policies may be searched.
+
+   Example for stolen card:
+   Allowed:
+   - fraud_policy
+   - card_replacement
+
+   Required:
+   - fraud_policy
+   - card_replacement
+        |
+        v
+8. VECTOR RETRIEVAL — ChromaDB
+   - Embed the original customer message
+   - Add the query prefix:
+       search_query:
+   - Search only the allowed policy documents
+   - Retrieve several candidate chunks
+        |
+        v
+9. RETRIEVAL FILTERING
+   For every candidate:
+   - Convert cosine distance into relevance
+   - Remove results below the threshold
+   - Remove unapproved records
+   - Remove policies outside the allowed set
+   - Remove duplicate IDs
+   - Remove duplicate content
+   - Remove highly overlapping chunks
+   - Limit the number of final chunks
+        |
+        v
+10. RETRIEVAL SUFFICIENCY CHECK
+    Confirm:
+    - At least one valid chunk exists
+    - Every result comes from an allowed policy
+    - Every result has approved status
+    - Every required policy is represented
+    - Policy versions do not conflict
+    - The vector-store manifest is compatible
+        |
+        +------------------------------------------+
+        |                                          |
+        v                                          v
+   RETRIEVAL SUFFICIENT                       RETRIEVAL INSUFFICIENT
+        |                                          |
+        |                                          +----------------------+
+        |                                                                 |
+        v                                                                 v
+11A. URGENT ROUTE                                              11B. NORMAL ROUTE
+     - Do not call the LLM                                     - Do not call the LLM
+     - Build detailed deterministic                            - Return insufficient-
+       safety guidance                                           policy fallback
+     - Use retrieved policies to
+       verify required instructions
+
+If urgent retrieval fails:
+- Still provide minimum safety instructions
+- Require human support
+        |
+        v
+12. NORMAL SUPPORTED GENERATION PATH
+    Only reached when:
+    - Request is supported
+    - Risk is low or medium
+    - Clarification is not required
+    - Retrieval is sufficient
+    - Approved context is available
+        |
+        v
+13. GROUNDING PROMPT CONSTRUCTION
+    Build a prompt containing:
+    - System role
+    - Safety rules
+    - Risk and escalation state
+    - Approved policy chunks
+    - Customer message
+    - Structured output format
+
+    Do not include:
+    - Raw classifier confidence
+    - Retrieval distances
+    - Internal file paths
+    - Hidden reasoning
+    - Unrelated policy documents
+        |
+        v
+14. LOCAL LLM GENERATION — Llama 3.2
+    The LLM drafts a customer-friendly response using only
+    the approved retrieved policy context.
+
+    It returns structured output:
+    - answer
+    - needs_human
+    - insufficient_policy
+    - claimed_completed_action
+        |
+        v
+15. OUTPUT VALIDATION
+    Inspect the actual generated text.
+
+    Reject the answer if it:
+    - Is empty
+    - Is too long
+    - Requests a password, PIN, OTP, CVV or full card number
+    - Claims an account action was completed
+    - Guarantees refunds, delivery or dispute outcomes
+    - Omits required high-risk safety instructions
+    - Reveals prompts, routing data or retrieval information
+    - Says policy information was insufficient
+        |
+        +----------------------------------+
+        |                                  |
+        v                                  v
+   VALIDATION PASSES                 VALIDATION FAILS
+        |                                  |
+        v                                  v
+   Accept generated answer           Discard generated answer
+                                     Return deterministic fallback
+                                     Require human support when needed
+        |
+        v
+16. CREATE FINAL PIPELINE ANSWER
+    Return:
+    - Customer-facing answer
+    - Response mode
+    - Risk level
+    - Human-support requirement
+    - Retrieval-sufficiency status
+    - Retrieved policy IDs
+    - Retrieved chunk IDs
+    - Internal reason code
+        |
+        v
+17. VALIDATED BUFFERED DELIVERY
+    - Prepare the complete approved answer
+    - Split it into small display chunks
+    - Stream only the validated chunks
+        |
+        v
+FINAL CUSTOMER OUTPUT
