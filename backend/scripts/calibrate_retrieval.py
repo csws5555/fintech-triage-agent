@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
@@ -25,12 +26,15 @@ from app.ml.risk_router import RiskRouter, risk_router  # noqa: E402
 from app.ml.triage_types import (  # noqa: E402
     ClassificationResult,
     IntentPrediction,
+    ResponseMode,
     RetrievedPolicy,
     TriageDecision,
 )
 
 
-CALIBRATION_SCHEMA_VERSION = 1
+CALIBRATION_SCHEMA_VERSION = 2
+MIN_EVALUATION_CASES = 40
+MAX_EVALUATION_CASES = 50
 CALIBRATION_THRESHOLDS = (
     0.20,
     0.25,
@@ -39,6 +43,51 @@ CALIBRATION_THRESHOLDS = (
     0.40,
     0.45,
     0.50,
+)
+EVALUATION_CATEGORIES = frozenset(
+    {
+        "security_stolen_card",
+        "security_lost_card",
+        "security_compromised_card",
+        "security_unauthorized_payment",
+        "security_unauthorized_withdrawal",
+        "security_account_takeover",
+        "security_stolen_card_with_unauthorized_withdrawals",
+        "security_stolen_card_without_app_access",
+        "security_hypothetical_stolen_card",
+        "security_negated_stolen_card",
+        "fees_foreign_atm",
+        "fees_card_purchase",
+        "fees_ambiguous_abroad",
+        "fees_international_transfer",
+        "fees_dynamic_currency_conversion",
+        "fees_unknown_transaction_type",
+        "fees_duplicate_international_charge",
+        "card_first_delivery_missing",
+        "card_replacement_delivery_missing",
+        "card_damaged",
+        "card_atm_retained",
+        "card_replacement_abroad",
+        "card_order_request",
+        "card_freeze_status_request",
+        "unsupported_mortgage_rate",
+        "unsupported_investment_advice",
+        "unsupported_cryptocurrency_account",
+        "unsupported_loan_approval",
+        "unsupported_virtual_card",
+        "clarification_forgotten_pin",
+        "unsupported_unrelated_non_banking",
+        "adversarial_reveal_system_prompt",
+        "adversarial_ignore_policy",
+        "adversarial_guarantee_refund",
+        "adversarial_print_all_policies",
+        "adversarial_claim_card_frozen",
+        "adversarial_request_otp",
+        "adversarial_fake_policy_instructions",
+        "adversarial_output_schema_override",
+        "regression_duplicate_domestic_charge",
+        "unsupported_savings_interest",
+    }
 )
 ROUTER_CATEGORIES = frozenset(
     {
@@ -91,7 +140,13 @@ class CalibrationCase:
     query: str
     classification: ClassificationResult
     router_categories: tuple[str, ...]
+    evaluation_categories: tuple[str, ...]
     expected_route: ExpectedRoute
+    expected_response_mode: ResponseMode
+    required_concepts: tuple[str, ...]
+    prohibited_concepts: tuple[str, ...]
+    requires_human: bool
+    should_call_llm: bool
     retrieval: RetrievalExpectation
 
 
@@ -238,6 +293,22 @@ def load_calibration_cases(
             raise CalibrationError(
                 "Each split needs supported and unsupported retrieval cases."
             )
+
+    covered_evaluation_categories = frozenset(
+        category
+        for case in cases
+        for category in case.evaluation_categories
+    )
+
+    if covered_evaluation_categories != EVALUATION_CATEGORIES:
+        raise CalibrationError(
+            "Dataset must cover every Step 29 evaluation category."
+        )
+
+    if not MIN_EVALUATION_CASES <= len(cases) <= MAX_EVALUATION_CASES:
+        raise CalibrationError(
+            "Step 29 dataset must contain 40 to 50 cases."
+        )
 
     return cases
 
@@ -565,17 +636,40 @@ def _parse_case(value: object) -> CalibrationCase:
             "uncertain",
             "top_two_margin",
             "router_categories",
+            "evaluation_categories",
             "expected_route",
+            "expected_response_mode",
+            "required_concepts",
+            "prohibited_concepts",
+            "requires_human",
+            "should_call_llm",
             "retrieval",
         },
         "case",
     )
     case_id = _nonblank_string(item["id"], "case.id")
+
+    if re.fullmatch(r"RAG-(?:CAL|EVAL)-\d{3}", case_id) is None:
+        raise CalibrationError(
+            "Calibration case ID is invalid."
+        )
+
     split = item["split"]
 
     if split not in {"calibration", "evaluation"}:
         raise CalibrationError(
             "Calibration case split is invalid."
+        )
+
+    expected_id_prefix = (
+        "RAG-CAL-"
+        if split == "calibration"
+        else "RAG-EVAL-"
+    )
+
+    if not case_id.startswith(expected_id_prefix):
+        raise CalibrationError(
+            "Calibration case ID does not match its split."
         )
 
     query = _nonblank_string(item["query"], "case.query")
@@ -682,8 +776,76 @@ def _parse_case(value: object) -> CalibrationCase:
             "Calibration router categories are invalid."
         )
 
+    evaluation_categories = _string_tuple(
+        item["evaluation_categories"],
+        "case.evaluation_categories",
+    )
+
+    if (
+        not evaluation_categories
+        or len(set(evaluation_categories))
+        != len(evaluation_categories)
+        or not set(evaluation_categories)
+        <= EVALUATION_CATEGORIES
+    ):
+        raise CalibrationError(
+            "Case evaluation categories are invalid."
+        )
+
     expected_route = _parse_expected_route(
         item["expected_route"]
+    )
+    expected_response_mode = _nonblank_string(
+        item["expected_response_mode"],
+        "case.expected_response_mode",
+    )
+
+    if expected_response_mode not in {
+        "static_fallback",
+        "deterministic_clarification",
+        "deterministic_safety",
+        "grounded_generation",
+    }:
+        raise CalibrationError(
+            "Expected response mode is invalid."
+        )
+
+    required_concepts = _concepts(
+        item["required_concepts"],
+        "case.required_concepts",
+    )
+    prohibited_concepts = _concepts(
+        item["prohibited_concepts"],
+        "case.prohibited_concepts",
+    )
+
+    if {
+        concept.casefold()
+        for concept in required_concepts
+    } & {
+        concept.casefold()
+        for concept in prohibited_concepts
+    }:
+        raise CalibrationError(
+            "Required and prohibited concepts must not overlap."
+        )
+
+    requires_human = item["requires_human"]
+    should_call_llm = item["should_call_llm"]
+
+    if not isinstance(requires_human, bool) or not isinstance(
+        should_call_llm,
+        bool,
+    ):
+        raise CalibrationError(
+            "Expected pipeline flags must be boolean."
+        )
+
+    _validate_pipeline_expectations(
+        expected_route=expected_route,
+        expected_response_mode=expected_response_mode,
+        requires_human=requires_human,
+        should_call_llm=should_call_llm,
     )
     retrieval = _parse_retrieval(item["retrieval"])
 
@@ -693,9 +855,53 @@ def _parse_case(value: object) -> CalibrationCase:
         query=query,
         classification=classification,
         router_categories=categories,
+        evaluation_categories=evaluation_categories,
         expected_route=expected_route,
+        expected_response_mode=expected_response_mode,
+        required_concepts=required_concepts,
+        prohibited_concepts=prohibited_concepts,
+        requires_human=requires_human,
+        should_call_llm=should_call_llm,
         retrieval=retrieval,
     )
+
+
+def _validate_pipeline_expectations(
+    *,
+    expected_route: ExpectedRoute,
+    expected_response_mode: str,
+    requires_human: bool,
+    should_call_llm: bool,
+) -> None:
+    expected_mode_by_action = {
+        "generate": "grounded_generation",
+        "clarify": "deterministic_clarification",
+        "urgent_guidance": "deterministic_safety",
+        "human_escalation": "deterministic_safety",
+        "static_response": "deterministic_safety",
+        "unsupported": "static_fallback",
+    }
+
+    if (
+        expected_response_mode
+        != expected_mode_by_action[expected_route.action]
+    ):
+        raise CalibrationError(
+            "Expected response mode is inconsistent with routing."
+        )
+
+    if should_call_llm != (expected_route.action == "generate"):
+        raise CalibrationError(
+            "Expected LLM usage is inconsistent with routing."
+        )
+
+    if expected_route.action in {
+        "human_escalation",
+        "unsupported",
+    } and not requires_human:
+        raise CalibrationError(
+            "Expected human support is inconsistent with routing."
+        )
 
 
 def _parse_expected_route(value: object) -> ExpectedRoute:
@@ -927,6 +1133,18 @@ def _string_tuple(value: object, name: str) -> tuple[str, ...]:
     if not isinstance(value, list):
         raise CalibrationError(f"{name} must be a list.")
     return tuple(_nonblank_string(item, name) for item in value)
+
+
+def _concepts(value: object, name: str) -> tuple[str, ...]:
+    concepts = _string_tuple(value, name)
+    normalized = tuple(concept.casefold() for concept in concepts)
+
+    if not concepts or len(set(normalized)) != len(normalized):
+        raise CalibrationError(
+            f"{name} must contain unique concepts."
+        )
+
+    return concepts
 
 
 def _policy_ids(

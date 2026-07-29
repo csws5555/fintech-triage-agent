@@ -230,6 +230,30 @@ def test_multi_policy_security_message() -> None:
     )
 
 
+def test_stolen_card_without_app_access_requires_human() -> None:
+    decision = route(
+        "My card was stolen. I cannot access the app."
+    )
+
+    assert decision.risk_level == "high"
+    assert decision.action == "urgent_guidance"
+    assert decision.requires_human is True
+    assert decision.required_policy_ids == (
+        "fraud_policy",
+        "card_replacement",
+    )
+
+
+def test_card_order_request_uses_account_operation_limitation() -> None:
+    decision = route("Order me a new card now.")
+
+    assert decision.risk_level == "low"
+    assert decision.action == "static_response"
+    assert decision.reason_code == "account_operation_request"
+    assert decision.allowed_policy_ids == ()
+    assert decision.required_policy_ids == ()
+
+
 def test_pin_wording_clarifies() -> None:
     decision = route("I forgot my PIN.")
 

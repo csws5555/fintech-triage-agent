@@ -69,6 +69,12 @@ def test_predictions_are_sorted_and_classifier_arguments_are_safe(
         [],
         [{"label": "one", "score": 0.5}],
         [
+            {"label": "one", "score": 0.4},
+            {"label": "two", "score": 0.3},
+            {"label": "three", "score": 0.2},
+            {"label": "four", "score": 0.1},
+        ],
+        [
             {"label": "same", "score": 0.7},
             {"label": "same", "score": 0.2},
             {"label": "other", "score": 0.1},
@@ -79,7 +85,17 @@ def test_predictions_are_sorted_and_classifier_arguments_are_safe(
             {"label": "three", "score": 0.1},
         ],
         [
+            {"label": "one", "score": 1.1},
+            {"label": "two", "score": 0.2},
+            {"label": "three", "score": 0.1},
+        ],
+        [
             {"label": "one", "score": float("nan")},
+            {"label": "two", "score": 0.2},
+            {"label": "three", "score": 0.1},
+        ],
+        [
+            {"label": "one", "score": float("inf")},
             {"label": "two", "score": 0.2},
             {"label": "three", "score": 0.1},
         ],
@@ -90,6 +106,38 @@ def test_malformed_predictions_are_rejected(
 ) -> None:
     with pytest.raises(ClassifierInferenceError):
         _normalize_predictions(output)
+
+
+def test_long_input_uses_configured_token_truncation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake = FakeClassifier(
+        [
+            {"label": "one", "score": 0.8},
+            {"label": "two", "score": 0.1},
+            {"label": "three", "score": 0.05},
+        ]
+    )
+    monkeypatch.setattr(
+        classifier_module,
+        "get_classifier",
+        lambda: fake,
+    )
+    long_message = " ".join(["customer"] * 200)
+
+    classify_intent(long_message)
+
+    assert fake.calls == [
+        (
+            long_message,
+            {
+                "top_k": 3,
+                "truncation": True,
+                "max_length": settings.classifier_max_length,
+            },
+        )
+    ]
+    assert settings.classifier_max_length == 128
 
 
 def test_low_confidence_sets_uncertainty(

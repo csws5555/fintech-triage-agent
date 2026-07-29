@@ -24,6 +24,8 @@ def test_current_settings_are_valid() -> None:
         ("chat_model", "llama3.2:cloud"),
         ("embedding_model", "unreviewed-embedder"),
         ("chroma_distance_metric", "l2"),
+        ("embedding_document_prefix", "passage:"),
+        ("embedding_query_prefix", "query:"),
         ("candidate_k", 0),
         ("max_context_chunks", 0),
         ("min_relevance_score", float("nan")),
@@ -46,6 +48,22 @@ def test_candidate_k_must_cover_context_count() -> None:
 
     with pytest.raises(RagConfigurationError):
         validate_rag_settings(invalid)
+
+
+@pytest.mark.parametrize(
+    "base_url",
+    (
+        "http://127.0.0.1:not-a-port",
+        "http://127.0.0.1:70000",
+    ),
+)
+def test_malformed_ollama_ports_are_rejected(
+    base_url: str,
+) -> None:
+    with pytest.raises(RagConfigurationError, match="port"):
+        validate_rag_settings(
+            replace(settings, ollama_base_url=base_url)
+        )
 
 
 def test_chunk_overlap_must_be_smaller_than_chunk_size() -> None:

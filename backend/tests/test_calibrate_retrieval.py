@@ -10,6 +10,7 @@ from app.ml.rag_config import settings
 from app.ml.triage_types import RetrievedPolicy
 from scripts.calibrate_retrieval import (
     CALIBRATION_THRESHOLDS,
+    EVALUATION_CATEGORIES,
     CalibrationError,
     RetrieverMetrics,
     build_calibration_report,
@@ -47,7 +48,7 @@ def policy(
 def test_project_dataset_is_strictly_valid_and_split() -> None:
     cases = load_calibration_cases()
 
-    assert len(cases) == 20
+    assert len(cases) == 46
     assert sum(
         case.split == "calibration"
         for case in cases
@@ -55,7 +56,43 @@ def test_project_dataset_is_strictly_valid_and_split() -> None:
     assert sum(
         case.split == "evaluation"
         for case in cases
-    ) == 10
+    ) == 36
+
+
+def test_project_dataset_covers_every_step_29_category() -> None:
+    cases = load_calibration_cases()
+    covered = {
+        category
+        for case in cases
+        for category in case.evaluation_categories
+    }
+
+    assert covered == EVALUATION_CATEGORIES
+
+
+def test_project_dataset_has_safe_pipeline_expectations() -> None:
+    cases = load_calibration_cases()
+
+    assert all(case.required_concepts for case in cases)
+    assert all(case.prohibited_concepts for case in cases)
+    assert all(
+        set(concept.casefold() for concept in case.required_concepts)
+        .isdisjoint(
+            concept.casefold()
+            for concept in case.prohibited_concepts
+        )
+        for case in cases
+    )
+    assert all(
+        case.should_call_llm
+        == (case.expected_route.action == "generate")
+        for case in cases
+    )
+    assert all(
+        case.expected_response_mode == "grounded_generation"
+        for case in cases
+        if case.should_call_llm
+    )
 
 
 def test_project_dataset_router_expectations_match_router() -> None:
@@ -112,6 +149,52 @@ def test_dataset_rejects_missing_locked_split(
     with pytest.raises(
         CalibrationError,
         match="Both calibration and evaluation",
+    ):
+        load_calibration_cases(path)
+
+
+def test_dataset_rejects_unknown_evaluation_category(
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(
+        settings.evaluation_cases_path.read_text(
+            encoding="utf-8"
+        )
+    )
+    payload["cases"][0]["evaluation_categories"] = [
+        "not_a_roadmap_category"
+    ]
+    path = tmp_path / "cases.json"
+    path.write_text(
+        json.dumps(payload),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        CalibrationError,
+        match="evaluation categories",
+    ):
+        load_calibration_cases(path)
+
+
+def test_dataset_rejects_inconsistent_llm_expectation(
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(
+        settings.evaluation_cases_path.read_text(
+            encoding="utf-8"
+        )
+    )
+    payload["cases"][0]["should_call_llm"] = True
+    path = tmp_path / "cases.json"
+    path.write_text(
+        json.dumps(payload),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        CalibrationError,
+        match="LLM usage",
     ):
         load_calibration_cases(path)
 

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import asyncio
+from collections.abc import AsyncIterator, Iterator, Sequence
 from typing import Protocol
 
 from app.ml.grounding_prompt import build_grounding_prompt
@@ -68,6 +69,7 @@ STRUCTURED_GENERATION_INVALID = (
     "structured_generation_invalid"
 )
 OUTPUT_VALIDATION_FAILED = "output_validation_failed"
+STREAM_CHUNK_CHARACTERS = 80
 
 
 class _RiskRouter(Protocol):
@@ -274,6 +276,36 @@ class FintechRagPipeline:
             decision=decision,
             policies=policies,
         )
+
+    def stream_answer(
+        self,
+        *,
+        query: str,
+        classification: ClassificationResult,
+    ) -> Iterator[str]:
+        """Yield chunks only after the complete answer is approved."""
+
+        result = self.answer(
+            query=query,
+            classification=classification,
+        )
+        yield from _iter_display_chunks(result.answer)
+
+    async def astream_answer(
+        self,
+        *,
+        query: str,
+        classification: ClassificationResult,
+    ) -> AsyncIterator[str]:
+        """Asynchronously yield a fully approved buffered answer."""
+
+        result = await asyncio.to_thread(
+            self.answer,
+            query=query,
+            classification=classification,
+        )
+        for chunk in _iter_display_chunks(result.answer):
+            yield chunk
 
     def _route(
         self,
@@ -705,6 +737,13 @@ def _pipeline_answer(
     )
 
 
+def _iter_display_chunks(text: str) -> Iterator[str]:
+    """Split approved text into exact, bounded display chunks."""
+
+    for offset in range(0, len(text), STREAM_CHUNK_CHARACTERS):
+        yield text[offset : offset + STREAM_CHUNK_CHARACTERS]
+
+
 rag_pipeline = FintechRagPipeline()
 
 
@@ -715,6 +754,7 @@ __all__ = [
     "RETRIEVAL_FAILED",
     "RETRIEVAL_INSUFFICIENT",
     "ROUTING_FAILED",
+    "STREAM_CHUNK_CHARACTERS",
     "STRUCTURED_GENERATION_INVALID",
     "UNMAPPED_STATIC_RESPONSE",
     "URGENT_RETRIEVAL_FAILED",

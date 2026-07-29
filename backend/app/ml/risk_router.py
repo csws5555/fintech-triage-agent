@@ -476,6 +476,18 @@ UNVERIFIED_ACTION_PATTERNS: tuple[
 )
 
 
+ACCOUNT_OPERATION_PATTERNS: tuple[
+    re.Pattern[str],
+    ...,
+] = _compile_patterns(
+    (
+        r"\border me\b(?:\W+\w+){0,5}\W+\bcard\b",
+        r"\bplace\b(?:\W+\w+){0,5}\W+\bcard order\b",
+        r"\bsubmit\b(?:\W+\w+){0,5}\W+\bcard request\b",
+    )
+)
+
+
 # ============================================================
 # General account-access patterns
 # ============================================================
@@ -489,6 +501,8 @@ LOGIN_PROBLEM_PATTERNS: tuple[
         r"\bcan['’]?t log in\b",
         r"\bcannot login\b",
         r"\bcan['’]?t login\b",
+        r"\bcannot access\b(?:\W+\w+){0,3}\W+\bapp\b",
+        r"\bcan['’]?t access\b(?:\W+\w+){0,3}\W+\bapp\b",
         r"\blocked out\b(?:\W+\w+){0,5}\W+\baccount\b",
         r"\bunable to access\b(?:\W+\w+){0,5}\W+\baccount\b",
     )
@@ -553,6 +567,7 @@ class MessageSignals:
 
     requests_internal_information: bool
     requests_unverified_action_status: bool
+    requests_account_operation: bool
 
     ambiguous_international_fee: bool
     ambiguous_pin_or_passcode: bool
@@ -796,6 +811,10 @@ def detect_message_signals(
             normalized,
             UNVERIFIED_ACTION_PATTERNS,
         ),
+        requests_account_operation=_matches_any(
+            normalized,
+            ACCOUNT_OPERATION_PATTERNS,
+        ),
         ambiguous_international_fee=(
             ambiguous_international_fee
         ),
@@ -836,10 +855,11 @@ class RiskRouter:
         2. Direct security incident.
         3. Internal-information request.
         4. Unverified completed-action request.
-        5. Mandatory clarification.
-        6. Unsupported request.
-        7. Classifier uncertainty.
-        8. Supported policy-grounded generation.
+        5. Explicit account-operation request.
+        6. Mandatory clarification.
+        7. Unsupported request.
+        8. Classifier uncertainty.
+        9. Supported policy-grounded generation.
         """
 
         normalized_message = self._validate_message(message)
@@ -1093,7 +1113,24 @@ class RiskRouter:
             )
 
         # --------------------------------------------------------
-        # 5. Mandatory clarification
+        # 5. Explicit account-operation request
+        # --------------------------------------------------------
+
+        if signals.requests_account_operation:
+            return self._decision(
+                risk_level="low",
+                action="static_response",
+                candidate_intents=candidate_intents,
+                routing_intents=routing_intents,
+                allowed_policy_ids=(),
+                required_policy_ids=(),
+                security_signals=(),
+                requires_human=False,
+                reason_code="account_operation_request",
+            )
+
+        # --------------------------------------------------------
+        # 6. Mandatory clarification
         # --------------------------------------------------------
 
         if signals.ambiguous_pin_or_passcode:
@@ -1187,7 +1224,7 @@ class RiskRouter:
             )
 
         # --------------------------------------------------------
-        # 6. Unsupported request
+        # 7. Unsupported request
         # --------------------------------------------------------
 
         supported_by_classifier = any_intent_is_supported(
@@ -1216,7 +1253,7 @@ class RiskRouter:
             )
 
         # --------------------------------------------------------
-        # 7. Classifier uncertainty
+        # 8. Classifier uncertainty
         # --------------------------------------------------------
 
         if (
@@ -1236,7 +1273,7 @@ class RiskRouter:
             )
 
         # --------------------------------------------------------
-        # 8. Normal supported generation
+        # 9. Normal supported generation
         # --------------------------------------------------------
 
         if not allowed_policy_ids:

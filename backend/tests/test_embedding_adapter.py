@@ -90,6 +90,12 @@ def test_empty_document_list_is_rejected() -> None:
         make_adapter(RecordingEmbeddings()).embed_documents([])
 
 
+@pytest.mark.parametrize("value", ("", " ", "\n\t"))
+def test_blank_document_text_is_rejected(value: str) -> None:
+    with pytest.raises(EmbeddingValidationError, match="blank"):
+        make_adapter(RecordingEmbeddings()).embed_documents([value])
+
+
 def test_malformed_existing_prefix_is_rejected() -> None:
     with pytest.raises(
         EmbeddingValidationError,
