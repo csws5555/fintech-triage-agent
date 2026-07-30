@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from starlette.requests import Request
 
 from app.api.config import api_settings
@@ -175,6 +176,64 @@ def test_application_factory_defers_service_construction_until_lifespan() -> Non
     assert getattr(created.state, "services", None) is None
 
 
+def test_application_factory_registers_exact_public_route_set() -> None:
+    created = create_app(service_builder=successful_builder([])[0])
+
+    assert {
+        path: tuple(operations)
+        for path, operations in created.openapi()["paths"].items()
+    }.keys() == {
+        "/health/live",
+        "/health/ready",
+        f"{api_settings.api_prefix}/chat",
+        f"{api_settings.api_prefix}/chat/stream",
+    }
+    assert {
+        path: set(operations)
+        for path, operations in created.openapi()["paths"].items()
+    } == {
+        "/health/live": {"get"},
+        "/health/ready": {"get"},
+        f"{api_settings.api_prefix}/chat": {"post"},
+        f"{api_settings.api_prefix}/chat/stream": {"post"},
+    }
+
+
+def test_multiple_http_requests_reuse_one_lifespan_service_graph() -> None:
+    calls: list[str] = []
+    builder, _, _, _ = successful_builder(calls)
+    created = create_app(service_builder=builder)
+
+    with TestClient(created) as client:
+        services = created.state.services
+        first = client.post(
+            f"{api_settings.api_prefix}/chat",
+            json={"message": "First supported request"},
+        )
+        assert created.state.services is services
+        second = client.post(
+            f"{api_settings.api_prefix}/chat",
+            json={"message": "Second supported request"},
+        )
+        assert created.state.services is services
+        assert services.classifier is builder.classifier
+        assert services.chat_service.classifier is services.classifier
+        assert services.chat_service.pipeline is services.pipeline
+        assert services.pipeline.calls == 2
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert calls == [
+        "warm_classifier",
+        "inspect_vector_store",
+        "build_retriever",
+        "build_embeddings",
+        "build_chat_model",
+        "build_pipeline",
+    ]
+    assert getattr(created.state, "services", None) is None
+
+
 @pytest.mark.asyncio
 async def test_successful_lifespan_populates_one_container_and_shuts_down() -> None:
     calls: list[str] = []
@@ -187,6 +246,9 @@ async def test_successful_lifespan_populates_one_container_and_shuts_down() -> N
         assert services.readiness.ready
         assert services.pipeline.retriever is retriever
         assert services.pipeline.llm is chat_model
+        assert services.classifier is builder.classifier
+        assert services.chat_service.classifier is services.classifier
+        assert services.chat_service.pipeline is services.pipeline
         assert get_app_services(request_for(created)) is services
         assert get_chat_service(services) is services.chat_service
         assert get_app_services(request_for(created)) is services

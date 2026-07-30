@@ -164,6 +164,19 @@ class StreamErrorEvent(_StrictPublicModel):
     error: ErrorDetail
 
 
+def stream_interrupted_event(*, request_id: str) -> StreamErrorEvent:
+    """Build the stable terminal error allowed after SSE headers."""
+
+    return StreamErrorEvent(
+        request_id=request_id,
+        error=ErrorDetail(
+            code="stream_interrupted",
+            message="The response stream was interrupted.",
+            retryable=True,
+        ),
+    )
+
+
 def public_status_for_pipeline_answer(
     pipeline_answer: PipelineAnswer,
 ) -> PublicStatus:
@@ -238,5 +251,6 @@ __all__ = [
     "StreamMetadataEvent",
     "chat_response_from_pipeline_answer",
     "public_status_for_pipeline_answer",
+    "stream_interrupted_event",
     "stream_metadata_from_chat_response",
 ]
