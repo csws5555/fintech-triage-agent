@@ -108,7 +108,9 @@ _SAFE_GUARANTEE_PATTERN = re.compile(
     r"\b(?:cannot|can['’]?t|can\s+not|do\s+not|don['’]?t|"
     r"unable\s+to|not|never)\s+(?:be\s+)?"
     r"(?:guarantee(?:d)?|promise(?:d)?)\b|"
-    r"\bno\s+(?:refund\s+|delivery\s+|outcome\s+)?guarantee\b",
+    r"\bno\s+(?:refund\s+|delivery\s+|outcome\s+)?guarantee\b|"
+    r"\bestimates?\s+(?:(?:are\s+)?not|rather\s+than)\s+"
+    r"guarantees?\b",
     re.IGNORECASE,
 )
 _EXPLICIT_GUARANTEE_PATTERN = re.compile(

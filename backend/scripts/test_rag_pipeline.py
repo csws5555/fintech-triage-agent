@@ -52,6 +52,10 @@ class LivePipelineTestError(RuntimeError):
     """Raised when a required live pipeline invariant fails."""
 
 
+class SafeGenerationRejectedError(LivePipelineTestError):
+    """Raised when validation safely rejects a live generated answer."""
+
+
 class Router(Protocol):
     """Minimal deterministic-router interface used by the command."""
 
@@ -365,6 +369,17 @@ def main() -> int:
 
     try:
         report = run_live_pipeline_checks()
+    except SafeGenerationRejectedError as exc:
+        print(
+            f"PIPELINE_SAFE / GENERATION_REJECTED: {exc}",
+            file=sys.stderr,
+        )
+        print(
+            "Strict live generation-quality check did not pass; "
+            "process exit code is 1.",
+            file=sys.stderr,
+        )
+        return 1
     except LivePipelineTestError as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1
@@ -476,40 +491,152 @@ def _validate_probe_outcome(
         or used_safe_generation_fallback
     )
 
-    if (
-        decision.risk_level != probe.expected_risk
-        or decision.action != probe.expected_action
-        or answer.risk_level != decision.risk_level
-        or not response_mode_matches
-        or retrieved != frozenset(probe.expected_policy_ids)
-        or llm_called != probe.should_call_llm
-        or not isinstance(answer.answer, str)
-        or not answer.answer.strip()
-        or len(answer.answer) > settings.max_response_characters
-    ):
-        raise LivePipelineTestError(
-            f"{probe.probe_id}: pipeline outcome did not match expectations."
+    outcome_mismatches: list[str] = []
+    if decision.risk_level != probe.expected_risk:
+        outcome_mismatches.append(
+            _expected_actual(
+                "route risk",
+                probe.expected_risk,
+                decision.risk_level,
+            )
+        )
+    if decision.action != probe.expected_action:
+        outcome_mismatches.append(
+            _expected_actual(
+                "route action",
+                probe.expected_action,
+                decision.action,
+            )
+        )
+    if answer.risk_level != decision.risk_level:
+        outcome_mismatches.append(
+            _expected_actual(
+                "answer risk",
+                decision.risk_level,
+                answer.risk_level,
+            )
+        )
+    if not response_mode_matches:
+        expected_mode = probe.expected_response_mode
+        if probe.allow_safe_generation_fallback:
+            expected_mode += " or approved safe fallback"
+        outcome_mismatches.append(
+            _expected_actual(
+                "response mode",
+                expected_mode,
+                answer.response_mode,
+            )
+        )
+    if retrieved != frozenset(probe.expected_policy_ids):
+        outcome_mismatches.append(
+            _expected_actual(
+                "retrieved policy IDs",
+                probe.expected_policy_ids,
+                answer.retrieved_policy_ids,
+            )
+        )
+    if llm_called != probe.should_call_llm:
+        outcome_mismatches.append(
+            _expected_actual(
+                "LLM called",
+                probe.should_call_llm,
+                llm_called,
+            )
+        )
+    if not isinstance(answer.answer, str) or not answer.answer.strip():
+        outcome_mismatches.append(
+            "final answer expected=nonblank actual=blank_or_invalid"
+        )
+    elif len(answer.answer) > settings.max_response_characters:
+        outcome_mismatches.append(
+            "answer length "
+            f"expected<={settings.max_response_characters} "
+            f"actual={len(answer.answer)}"
         )
 
+    if outcome_mismatches:
+        safe_generation_rejected = _is_safe_generation_rejection(
+            probe,
+            decision=decision,
+            answer=answer,
+            llm_called=llm_called,
+            validator_results=tracked_validator.results,
+            outcome_mismatches=outcome_mismatches,
+        )
+        error_type = (
+            SafeGenerationRejectedError
+            if safe_generation_rejected
+            else LivePipelineTestError
+        )
+        raise error_type(
+            _probe_mismatch_message(
+                probe,
+                summary="pipeline outcome did not match expectations",
+                mismatches=outcome_mismatches,
+                answer=answer,
+                validator_results=tracked_validator.results,
+                validator_rejected=safe_generation_rejected,
+            )
+        )
+
+    metadata_mismatches: list[str] = []
     if (
         probe.expected_allowed_policy_ids is not None
         and frozenset(decision.allowed_policy_ids)
         != frozenset(probe.expected_allowed_policy_ids)
-    ) or (
+    ):
+        metadata_mismatches.append(
+            _expected_actual(
+                "allowed policy IDs",
+                probe.expected_allowed_policy_ids,
+                decision.allowed_policy_ids,
+            )
+        )
+    if (
         probe.expected_required_policy_ids is not None
         and frozenset(decision.required_policy_ids)
         != frozenset(probe.expected_required_policy_ids)
-    ) or (
+    ):
+        metadata_mismatches.append(
+            _expected_actual(
+                "required policy IDs",
+                probe.expected_required_policy_ids,
+                decision.required_policy_ids,
+            )
+        )
+    if (
         probe.expected_requires_human is not None
-        and answer.requires_human
-        is not probe.expected_requires_human
-    ) or (
+        and answer.requires_human is not probe.expected_requires_human
+    ):
+        metadata_mismatches.append(
+            _expected_actual(
+                "requires human",
+                probe.expected_requires_human,
+                answer.requires_human,
+            )
+        )
+    if (
         probe.expected_retrieval_sufficient is not None
         and answer.retrieval_sufficient
         is not probe.expected_retrieval_sufficient
     ):
+        metadata_mismatches.append(
+            _expected_actual(
+                "retrieval sufficient",
+                probe.expected_retrieval_sufficient,
+                answer.retrieval_sufficient,
+            )
+        )
+
+    if metadata_mismatches:
         raise LivePipelineTestError(
-            f"{probe.probe_id}: pipeline metadata did not match expectations."
+            _probe_mismatch_message(
+                probe,
+                summary="pipeline metadata did not match expectations",
+                mismatches=metadata_mismatches,
+                answer=answer,
+                validator_results=tracked_validator.results,
+            )
         )
 
     if not used_safe_generation_fallback and any(
@@ -611,6 +738,109 @@ def _validator_result_text(
         return "PASS"
 
     return "FAIL:" + ",".join(latest.failure_codes)
+
+
+def _expected_actual(
+    field_name: str,
+    expected: object,
+    actual: object,
+) -> str:
+    return (
+        f"{field_name} expected={_diagnostic_value(expected)} "
+        f"actual={_diagnostic_value(actual)}"
+    )
+
+
+def _diagnostic_value(value: object) -> str:
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, tuple):
+        return _format_values(value)
+    return str(value)
+
+
+def _is_safe_generation_rejection(
+    probe: PipelineProbe,
+    *,
+    decision: TriageDecision,
+    answer: PipelineAnswer,
+    llm_called: bool,
+    validator_results: list[OutputValidationResult],
+    outcome_mismatches: list[str],
+) -> bool:
+    metadata_matches = (
+        (
+            probe.expected_allowed_policy_ids is None
+            or frozenset(decision.allowed_policy_ids)
+            == frozenset(probe.expected_allowed_policy_ids)
+        )
+        and (
+            probe.expected_required_policy_ids is None
+            or frozenset(decision.required_policy_ids)
+            == frozenset(probe.expected_required_policy_ids)
+        )
+        and (
+            probe.expected_requires_human is None
+            or answer.requires_human is probe.expected_requires_human
+        )
+        and (
+            probe.expected_retrieval_sufficient is None
+            or answer.retrieval_sufficient
+            is probe.expected_retrieval_sufficient
+        )
+    )
+    return (
+        len(outcome_mismatches) == 1
+        and outcome_mismatches[0].startswith("response mode ")
+        and probe.should_call_llm
+        and decision.risk_level == probe.expected_risk
+        and decision.action == probe.expected_action
+        and answer.risk_level == decision.risk_level
+        and frozenset(answer.retrieved_policy_ids)
+        == frozenset(probe.expected_policy_ids)
+        and llm_called
+        and answer.response_mode == "static_fallback"
+        and answer.reason_code == OUTPUT_VALIDATION_FAILED
+        and answer.requires_human
+        and answer.retrieval_sufficient
+        and bool(validator_results)
+        and any(
+            not result.safe or bool(result.failure_codes)
+            for result in validator_results
+        )
+        and metadata_matches
+    )
+
+
+def _probe_mismatch_message(
+    probe: PipelineProbe,
+    *,
+    summary: str,
+    mismatches: list[str],
+    answer: PipelineAnswer,
+    validator_results: list[OutputValidationResult],
+    validator_rejected: bool = False,
+) -> str:
+    normalized_answer = (
+        " ".join(answer.answer.split())
+        if isinstance(answer.answer, str) and answer.answer.strip()
+        else "<blank or invalid>"
+    )
+    validator_result = _validator_result_text(validator_results)
+    if validator_rejected and validator_result.startswith("FAIL:"):
+        validator_result = (
+            "REJECTED:" + validator_result.removeprefix("FAIL:")
+        )
+    return (
+        f"{probe.probe_id}: {summary}. "
+        f"Mismatches: {'; '.join(mismatches)}. "
+        "Safe execution snapshot: "
+        f"validator={validator_result}; "
+        f"requires_human={_diagnostic_value(answer.requires_human)}; "
+        "retrieval_sufficient="
+        f"{_diagnostic_value(answer.retrieval_sufficient)}; "
+        f"final_answer={normalized_answer}"
+    )
 
 
 def _format_values(values: tuple[str, ...]) -> str:

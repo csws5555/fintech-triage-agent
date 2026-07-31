@@ -248,10 +248,33 @@ def test_unsupported_guarantees_are_rejected(answer: str) -> None:
         "A dispute outcome is not guaranteed.",
         "Investigation results cannot be promised.",
         "A fee reversal cannot be guaranteed.",
+        "Delivery times are estimates rather than guarantees.",
+        "Delivery estimates are not guarantees.",
     ),
 )
 def test_explicit_non_guarantees_are_safe(answer: str) -> None:
     assert validate(answer).safe is True
+
+
+@pytest.mark.parametrize(
+    "answer",
+    (
+        (
+            "Delivery times are estimates rather than guarantees, "
+            "but we guarantee arrival on Tuesday."
+        ),
+        (
+            "Delivery estimates are not guarantees, although your "
+            "card will arrive on Tuesday."
+        ),
+    ),
+)
+def test_safe_estimate_wording_does_not_mask_a_separate_guarantee(
+    answer: str,
+) -> None:
+    result = validate(answer)
+
+    assert result.failure_codes == (UNSUPPORTED_GUARANTEE,)
 
 
 def test_stolen_card_answer_with_all_concepts_passes() -> None:

@@ -10,17 +10,17 @@ Status vocabulary:
 
 ## Current phase
 
-Phase 2 — Safe Local RAG and Triage Orchestration — complete and verified.
+Phase 3 — FastAPI Backend Integration — active.
 
-The repository implementation is complete through Step 35. No Phase 2 roadmap
-step remains incomplete; the next project phase is Phase 3 backend API
-integration.
+Phase 2 remains complete and verified through Step 35. Phase 3 Steps 1–11 are
+complete and verified; Step 12 is the next incomplete roadmap step.
 
-Roadmap source:
+Roadmap sources:
 
-`personal project documentation/phase 2 steps.md`
+- `personal project documentation/phase 2 steps.md`
+- `personal project documentation/phase 3 steps.md`
 
-## Roadmap status
+## Phase 2 roadmap status
 
 | Step | Status | Repository evidence |
 | --- | --- | --- |
@@ -61,12 +61,271 @@ Roadmap source:
 | 34 — Safe logging and redaction | `COMPLETE_AND_VERIFIED` | The service-free redactor covers every roadmap secret family, confidence values are bucketed, structured log records reject non-allowlisted fields and unsafe values, and 54 focused tests pass. |
 | 35 — Phase 2 execution order | `COMPLETE_AND_VERIFIED` | The ordered deterministic, Ollama, policy, staged rebuild, store inspection, retrieval, calibration, complete test, live pipeline, exact matrix, locked quality, and Phase 3 handoff checks pass. |
 
+## Phase 3 roadmap status
+
+| Step | Status | Repository evidence |
+| --- | --- | --- |
+| 1 — Dependencies, configuration, and execution tracking | `COMPLETE_AND_VERIFIED` | FastAPI and Starlette are exact direct pins; immutable API settings validate the explicit backend environment, numeric limits, API prefix, request-body headroom, log levels, and restrictive exact CORS origins. Seventy-one focused tests and the full 610-test non-integration suite pass. |
+| 2 — Safe HTTP, health, error, and SSE contracts | `COMPLETE_AND_VERIFIED` | Strict API-only request, chat, error, liveness, readiness, and SSE payloads reuse Phase 2 enums and limits without exposing internal answers. All 38 focused tests and the 648-test non-integration suite pass. |
+| 3 — Shared services and bounded execution | `COMPLETE_AND_VERIFIED` | One per-application service container and bounded executor run the classifier-plus-pipeline job off the event loop. Queue and execution timeouts, cancellation-safe capacity retention, concurrency bounds, stable service exceptions, instance reuse, and orderly shutdown pass focused tests. |
+| 4 — Application factory and lifespan | `COMPLETE_AND_VERIFIED` | `create_app(...)` owns one lifespan-initialized `AppServices` container, eagerly warms the classifier, validates the manifest/store without embedding, bounds optional local-client initialization, degrades safely, exposes typed dependencies, and closes/removes API-owned state at shutdown. |
+| 5 — Health and readiness endpoints | `COMPLETE_AND_VERIFIED` | Typed liveness and readiness routes expose only safe component availability. One bounded, coalesced installed-model inventory probe and synchronized cooldown-based optional recovery preserve the shared pipeline and pass focused and full service-free tests. |
+| 6 — Request controls, CORS, IDs, and logging | `COMPLETE_AND_VERIFIED` | Pure ASGI middleware generates server UUIDs, bounds and exactly replays chat bodies, enforces JSON media types, installs exact-origin CORS, and emits one allowlisted redacted JSON completion record. Focused and full service-free tests pass. |
+| 7 — Error translation | `COMPLETE_AND_VERIFIED` | Central typed mappings, FastAPI validation/HTTP handlers, and an inner ASGI error boundary return only stable `ErrorResponse` payloads, preserve request IDs/CORS, retain safe internal log codes, keep Phase 2 fallbacks at HTTP 200, suppress disconnect responses, and re-raise cancellation. Focused and full service-free tests pass. |
+| 8 — Normal chat endpoint | `COMPLETE_AND_VERIFIED` | `POST /api/v1/chat` dependency-injects the shared service, performs one bounded classifier-plus-pipeline execution, maps only the typed public answer, adds aggregate-safe metadata, documents controlled errors, and preserves every Phase 2 answer branch as HTTP 200. Focused and full service-free tests pass. |
+| 9 — Buffered SSE endpoint | `COMPLETE_AND_VERIFIED` | `POST /api/v1/chat/stream` performs one bounded complete execution before headers, then emits typed metadata, approved 80-character chunks, and a done marker; controlled pre-stream errors, safe post-header errors, disconnects, cancellation, exact framing, and leakage prevention pass focused and full service-free tests. |
+| 10 — Lifecycle, health, configuration, and OpenAPI tests | `COMPLETE_AND_VERIFIED` | Service-free assembled-app tests prove exact route registration, lifespan success/shutdown, mandatory and degraded startup, shared dependency identity, generation-free health checks, strict public OpenAPI schemas/statuses/SSE documentation, and absence of internal Phase 2 contracts. |
+| 11 — Validation, security, CORS, concurrency, and leakage tests | `COMPLETE_AND_VERIFIED` | Service-free assembled HTTP tests reject invalid and server-owned fields, preserve selected real deterministic Phase 2 safety branches, prove exact CORS/no-credentials behavior and shared lifespan dependencies, retain bounded concurrency/queue coverage, and exclude private runtime data from public bodies and aggregate logs. |
+| 12 — Timeout, cancellation, and disconnect behavior | `NOT_STARTED` | Transport cancellation behavior is not in scope yet. |
+| 13 — Real API integration coverage and local runner | `NOT_STARTED` | No runner or API integration test has been added. |
+| 14 — Final verification and Phase 4 handoff | `NOT_STARTED` | Phase 3 is active. |
+
 No roadmap step is currently `PARTIAL` or `BLOCKED`.
+
+### Phase 3 Step 1 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_config.py` | `COMPLETE_AND_VERIFIED` — 71 passed. |
+| `python -m pytest -q tests/test_rag_config.py tests/test_api_config.py` | `COMPLETE_AND_VERIFIED` — 92 passed. |
+| `python -c "import fastapi, starlette, uvicorn, httpx; print('PASS API imports')"` | `COMPLETE_AND_VERIFIED` — printed `PASS API imports`. |
+| `python -c "from app.api.config import api_settings; print('PASS API settings import')"` | `COMPLETE_AND_VERIFIED` — explicit local configuration loaded and printed only the pass marker. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 610 passed, 3 deselected. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 1 required no live Ollama, Chroma, classifier inference, running
+FastAPI application, or integration test. None was run or accessed.
+
+### Phase 3 Step 2 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_models.py` | `COMPLETE_AND_VERIFIED` — 38 passed. |
+| `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` — the first sandboxed launch was denied before Python started; the approved rerun exited 0. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 648 passed, 3 deselected. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 2 required no live Ollama, Chroma, classifier inference, running
+FastAPI application, CORS behavior, lifecycle state, async execution, or
+integration test. None was run or accessed.
+
+### Phase 3 Step 3 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — 9 passed in 3.17s. |
+| `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q tests/test_api_config.py tests/test_api_models.py tests/test_api_services.py tests/test_async_streaming.py` | `COMPLETE_AND_VERIFIED` — 122 passed in 25.62s. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 657 passed, 3 deselected in 46.54s. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 3 used injected classifier and pipeline fakes. It required no live
+Ollama, Chroma, classifier inference, running FastAPI application, CORS,
+request route, SSE transport, or integration test. None was run or accessed.
+
+### Phase 3 Step 4 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m compileall app\api app\main.py tests\test_api_app.py` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q tests/test_api_app.py tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — final rerun: 17 passed in 33.79s. |
+| `python -m pytest -q tests/test_api_config.py tests/test_api_models.py tests/test_api_services.py tests/test_api_app.py tests/test_async_streaming.py` | `COMPLETE_AND_VERIFIED` — 130 passed in 36.93s. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — final rerun: 665 passed, 3 deselected in 24.44s. |
+| `python scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 4 exercised the FastAPI lifespan in-process with a fully injected
+`ServiceBuilder`. It did not load the live classifier, contact Ollama, open the
+active Chroma store, run classifier inference, start a server, install CORS,
+register routes, or run integration tests.
+
+### Phase 3 Step 5 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests\test_api_health.py` | `COMPLETE_AND_VERIFIED` — 11 passed in 36.56s; one upstream TestClient deprecation warning. |
+| `python -m pytest -q tests\test_api_health.py tests\test_api_app.py tests\test_api_services.py tests\test_api_models.py tests\test_api_config.py` | `COMPLETE_AND_VERIFIED` — 137 passed in 45.62s; one upstream TestClient deprecation warning. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 676 passed, 3 deselected in 43.48s; one upstream TestClient deprecation warning. |
+| `python scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 5 exercised the routes in-process with fully injected fakes. No
+live Ollama, Chroma, classifier inference, generation, embedding, running
+server, CORS behavior, integration test, or persistent-store operation was
+run. The focused tests prove HTTP 200/503 behavior, all individual degraded
+components, recovery, cooldown/coalescing, timeout, pipeline identity, and
+absence of classifier/pipeline execution.
+
+### Phase 3 Step 6 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m compileall app\api app\main.py` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q tests\test_redaction.py tests\test_api_middleware.py` | `COMPLETE_AND_VERIFIED` — final rerun: 83 passed in 32.68s. |
+| `python -m pytest -q tests\test_api_middleware.py tests\test_api_health.py tests\test_api_app.py tests\test_api_models.py tests\test_api_config.py` | `COMPLETE_AND_VERIFIED` — final rerun: 155 passed in 33.73s; one upstream TestClient deprecation warning. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — final rerun: 703 passed, 3 deselected in 36.74s; one upstream TestClient deprecation warning. |
+| `python scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 6 used pure ASGI messages and in-process application inspection.
+It exercised unique server IDs, header/payload/event consistency seams,
+incremental multi-frame byte limits, exact body replay, early and dishonest
+`Content-Length` handling, JSON media types, exact-origin CORS, preflights,
+post-final-frame logging, disconnect tracking, redaction, confidence bucketing,
+and API log allowlisting. No live Ollama, Chroma, classifier inference,
+generation, embedding, running server, integration test, or persistent-store
+operation was run.
+
+### Phase 3 Step 7 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_errors.py tests/test_api_middleware.py` | `COMPLETE_AND_VERIFIED` — final rerun: 56 passed in 35.19s; one upstream TestClient deprecation warning. |
+| `python -m pytest -q tests/test_api_errors.py tests/test_api_middleware.py tests/test_api_health.py tests/test_api_app.py tests/test_api_models.py tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — 122 passed in 23.80s; one upstream TestClient deprecation warning. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 732 passed, 3 deselected in 47.14s; one upstream TestClient deprecation warning. |
+| `python scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+The initial combined focused compile/test command compiled successfully but
+reported 4 failed and 51 passed because one new secrecy assertion incorrectly
+forbade the required public field name `message`. The assertion was corrected;
+the final focused and full runs above pass.
+
+Phase 3 Step 7 used injected exceptions, pure ASGI callables, and in-process
+FastAPI requests without entering the production lifespan. It covered every
+roadmap mapping, malformed/secret-bearing validation input, framework HTTP
+errors, request-ID and CORS preservation, internal error logging, safe Phase 2
+fallback status, disconnect-with-no-response, and cancellation passthrough. No
+live Ollama, Chroma, classifier inference, generation, embedding, running
+server, integration test, or persistent-store operation was run.
+
+### Phase 3 Step 8 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m compileall app/api tests/test_api_chat.py` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q tests/test_api_chat.py tests/test_api_errors.py` | `COMPLETE_AND_VERIFIED` — 46 passed in 17.28s; one upstream TestClient deprecation warning. |
+| `python -m pytest -q tests/test_api_chat.py tests/test_api_errors.py tests/test_api_middleware.py tests/test_api_app.py tests/test_api_models.py tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — 128 passed in 27.36s; one upstream TestClient deprecation warning. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 749 passed, 3 deselected in 51.52s; one upstream TestClient deprecation warning. |
+| `python scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 8 used dependency-overridden fake chat services and in-process
+FastAPI requests without entering the production lifespan. It covered
+grounded, deterministic safety, clarification, unsupported, critical,
+unverified-action, account-operation, internal-information, and typed
+safe-fallback answers; exact public fields; one normalized service call;
+aggregate-safe logging; controlled classifier, pipeline, queue, execution
+timeout, and unexpected failures; leakage prevention; and the route's declared
+OpenAPI responses. No live Ollama, Chroma, classifier inference, generation,
+embedding, running server, integration test, or persistent-store operation was
+run.
+
+### Phase 3 Step 9 verification
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest -q tests/test_api_streaming.py tests/test_streaming.py tests/test_async_streaming.py` | Initial two runs: `3 failed, 16 passed` because the request-control replay synthesized a disconnect after body parsing. After preserving the underlying receive channel and making explicit stream polling its sole owner, the final run was `19 passed in 13.59s`; one upstream TestClient deprecation warning. |
+| `python -m pytest -q tests/test_api_streaming.py tests/test_api_chat.py tests/test_api_errors.py tests/test_api_middleware.py tests/test_api_models.py tests/test_api_services.py` | `COMPLETE_AND_VERIFIED` — 129 passed in 17.23s; one upstream TestClient deprecation warning. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 758 passed, 3 deselected in 22.45s; one upstream TestClient deprecation warning. |
+| `python scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `python scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `python -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 9 used dependency-overridden fake chat services, in-process
+FastAPI requests, and direct async generator transport tests without entering
+the production lifespan. It covered exact compact SSE framing and JSON
+escaping, grounded and deterministic metadata, ordered bounded chunks, exact
+answer reconstruction, completion counts, controlled pre-stream HTTP errors,
+safe post-header errors, disconnects before and between chunks, cancellation,
+unsupported disconnect polling, one service execution, no raw model-stream
+calls, and internal-data leakage prevention. No live Ollama, Chroma,
+classifier inference, generation, embedding, running server, integration test,
+or persistent-store operation was run.
+
+### Phase 3 Step 10 verification
+
+| Command | Result |
+| --- | --- |
+| `.\venv\Scripts\python.exe -m pytest -q tests\test_api_config.py tests\test_api_models.py tests\test_api_app.py tests\test_api_health.py tests\test_api_openapi.py` | `COMPLETE_AND_VERIFIED` — 134 passed in 33.29s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q tests\test_api_app.py tests\test_api_chat.py tests\test_api_config.py tests\test_api_errors.py tests\test_api_health.py tests\test_api_middleware.py tests\test_api_models.py tests\test_api_openapi.py tests\test_api_services.py tests\test_api_streaming.py` | `COMPLETE_AND_VERIFIED` — 225 passed in 38.68s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 764 passed, 3 deselected in 44.18s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 10 uses injected `ServiceBuilder` fakes and in-process schema or
+health requests. It proves that OpenAPI generation initializes no classifier,
+retriever, embeddings, chat model, pipeline, Ollama client, or Chroma client;
+that the four application paths and methods are exact; that the public models
+are strict; that health and chat status codes are documented; and that the SSE
+media type plus `metadata`, `chunk`, `done`, and `error` events are described.
+No live Ollama, Chroma, classifier inference, generation, embedding, running
+server, integration test, or persistent-store operation was run.
+
+### Phase 3 Step 11 verification
+
+| Command | Result |
+| --- | --- |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_chat.py tests/test_api_middleware.py tests/test_api_errors.py tests/test_api_services.py tests/test_api_app.py` | `COMPLETE_AND_VERIFIED` — 101 passed in 20.05s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_*.py` | Failed before collection because this Windows pytest invocation did not expand the wildcard; no tests ran. Replaced by the explicit file-list command below. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_app.py tests/test_api_chat.py tests/test_api_config.py tests/test_api_errors.py tests/test_api_health.py tests/test_api_middleware.py tests/test_api_models.py tests/test_api_openapi.py tests/test_api_services.py tests/test_api_streaming.py` | `COMPLETE_AND_VERIFIED` — 235 passed in 21.14s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 774 passed, 3 deselected in 44.24s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 11 adds tests only. Assembled chat-route coverage now rejects
+empty, blank, overlong, malformed, wrong-media-type, over-body-limit, extra,
+and server-owned classification/risk/policy/retrieval/prompt/validator input
+without invoking the service. Selected prompt-injection, hidden-information,
+full-policy, refund-guarantee, sensitive-authentication-data, completed-action,
+and account-operation cases run through the real deterministic router and
+pipeline with a fake classifier and no optional local service. CORS tests
+cover approved and unapproved simple origins and preflights with credentials
+disabled. Lifespan tests prove the same classifier, pipeline, chat service,
+container, and executor graph serves multiple requests. Response/log tests
+exclude prompts, policy and retrieval identifiers, distances, exact scores,
+paths, stack traces, authorization headers, client request IDs, and secrets.
+No live Ollama, Chroma, classifier inference, generation, embedding, running
+server, integration test, or persistent-store operation was run.
 
 ## Presently implemented files
 
 Core modules:
 
+- `backend/app/api/config.py`
+- `backend/app/api/dependencies.py`
+- `backend/app/api/errors.py`
+- `backend/app/api/middleware.py`
+- `backend/app/api/models.py`
+- `backend/app/api/routes/__init__.py`
+- `backend/app/api/routes/chat.py`
+- `backend/app/api/routes/health.py`
+- `backend/app/api/services.py`
+- `backend/app/main.py`
 - `backend/app/ml/rag_config.py`
 - `backend/app/ml/triage_types.py`
 - `backend/app/ml/classifier.py`
@@ -83,6 +342,20 @@ Core modules:
 - `backend/app/ml/output_validator.py`
 - `backend/app/ml/redaction.py`
 - `backend/app/ml/rag_pipeline.py`
+
+Phase 3 focused tests and tracking:
+
+- `backend/tests/test_api_config.py`
+- `backend/tests/test_api_app.py`
+- `backend/tests/test_api_models.py`
+- `backend/tests/test_api_services.py`
+- `backend/tests/test_api_health.py`
+- `backend/tests/test_api_middleware.py`
+- `backend/tests/test_api_errors.py`
+- `backend/tests/test_api_chat.py`
+- `backend/tests/test_api_streaming.py`
+- `backend/tests/test_api_openapi.py`
+- `docs/plans/phase-3-backend-api.md`
 
 Policies:
 
@@ -137,6 +410,48 @@ Tests:
 
 ## Important public interfaces
 
+- `POST /api/v1/chat` (`ChatRequest` -> `ChatResponse`, with controlled
+  `ErrorResponse` statuses 413, 415, 422, 500, 503, and 504)
+- `POST /api/v1/chat/stream` (`ChatRequest` -> validated buffered
+  `text/event-stream`, with `metadata`, `chunk`, `done`, and terminal `error`
+  event contracts plus the same controlled pre-stream error statuses)
+- `app.api.config.ApiSettings`
+- `app.api.config.api_settings`
+- `app.api.config.load_api_settings(...)`
+- `app.api.config.validate_api_settings(...)`
+- `app.api.models.PublicStatus`
+- `app.api.models.ChatRequest`
+- `app.api.models.ChatResponse`
+- `app.api.models.ErrorDetail`
+- `app.api.models.ErrorResponse`
+- `app.api.models.LivenessResponse`
+- `app.api.models.ReadinessComponents`
+- `app.api.models.ReadinessResponse`
+- `app.api.models.StreamMetadataEvent`
+- `app.api.models.StreamChunkEvent`
+- `app.api.models.StreamDoneEvent`
+- `app.api.models.StreamErrorEvent`
+- `app.api.models.public_status_for_pipeline_answer(...)`
+- `app.api.models.chat_response_from_pipeline_answer(...)`
+- `app.api.models.stream_interrupted_event(...)`
+- `app.api.models.stream_metadata_from_chat_response(...)`
+- `app.api.services.ClassifierCallable`
+- `app.api.services.ServiceReadiness`
+- `app.api.services.ChatExecution`
+- `app.api.services.ApiChatService`
+- `app.api.services.AppServices`
+- `app.api.services.ApiServiceError`
+- `app.api.services.ServiceQueueTimeoutError`
+- `app.api.services.ServiceExecutionTimeoutError`
+- `app.api.services.ClassifierServiceError`
+- `app.api.services.PipelineServiceError`
+- `app.api.services.ServiceShuttingDownError`
+- `app.api.dependencies.get_app_services(...)`
+- `app.api.dependencies.get_chat_service(...)`
+- `app.main.ApplicationStartupError`
+- `app.main.ServiceBuilder`
+- `app.main.create_app(...)`
+- `app.main.app`
 - `app.ml.rag_config.RagSettings`
 - `app.ml.rag_config.settings`
 - `app.ml.rag_config.load_rag_settings(...)`
@@ -247,7 +562,17 @@ are `python scripts/test_retrieval.py` and
 `scripts.test_retrieval.run_live_retrieval_checks(...)` and
 `scripts.test_rag_pipeline.run_live_pipeline_checks(...)`. Pytest discovery is
 restricted to `backend/tests/` so the roadmap-mandated operator script names
-are not collected as test modules.
+are not collected as test modules. The live pipeline command prints the full
+safe report on success. When generation is safely rejected by output
+validation and every routing, retrieval, invocation, containment, and
+configured metadata invariant still matches, it prints
+`PIPELINE_SAFE / GENERATION_REJECTED` with `validator=REJECTED:<code>` and
+returns exit code 1 for the strict generation-quality check. Only genuine
+pipeline invariant failures retain the `FAIL` label. Safe diagnostics include
+expected-versus-actual route, response-mode, policy-ID, LLM-call, validator,
+retrieval-sufficiency, human-support, and final-customer-answer facts without
+exposing prompts, rejected generated text, policy bodies, scores, paths, or
+secrets.
 
 Step 32 adds the read-only operator entry point
 `python scripts/test_phase2_matrix.py` and the reusable
@@ -287,6 +612,11 @@ Working directory: `backend/`
 
 | Command | Status | Exact result |
 | --- | --- | --- |
+| `python -m pytest -q tests/test_api_models.py` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final focused run: `38 passed in 0.15s`; strict transport validation, readiness consistency, status mapping, and leakage assertions pass. |
+| `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` | The first sandboxed launch was denied before Python started; the approved rerun exited 0. |
+| `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final run exited 0. |
+| `python -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final run: `648 passed, 3 deselected in 17.81s`; exit code 0. |
+| Phase 3 Step 2 repository validation commands | `COMPLETE_AND_VERIFIED` | Protected baseline: 5 artifacts passed; policies: 4 passed; dependency check: no broken requirements. Live services and integration tests were not run because Step 2 is service-free. |
 | `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Step 35 initial run exited 0. The first final launch was sandbox-denied before Python started; the approved final rerun exited 0. |
 | `python -m pytest -q tests/test_redaction.py` | `COMPLETE_AND_VERIFIED` | `56 passed in 0.10s`; unlabeled invalid-checksum identifiers remain visible while contextual and checksum-valid card values are redacted. |
 | `python -m pytest -q tests/test_inspect_vector_store.py tests/test_redaction.py` | `COMPLETE_AND_VERIFIED` | `71 passed in 10.23s`; safe inspection output and redaction compatibility pass. |
@@ -300,6 +630,7 @@ Working directory: `backend/`
 | `python -m pytest -q` | `COMPLETE_AND_VERIFIED` | `542 passed, 3 warnings in 37.52s`; the warnings are Chroma's legacy embedding-function configuration deprecation warning. |
 | `python -m pytest -q -m integration` | `COMPLETE_AND_VERIFIED` | `3 passed, 539 deselected, 3 warnings in 29.08s`; live chat initialization, structured generation, and temporary staged Nomic/Chroma rebuild passed. |
 | `python scripts/test_rag_pipeline.py` | `COMPLETE_AND_VERIFIED` | The first live run had one transient generated-delivery mismatch; safe metadata retry and the final full run passed all seven classifier-to-answer probes with two validated real LLM calls. |
+| User-reported post-Step-11 `python scripts/test_rag_pipeline.py` rerun on 2026-07-30 | `COMPLETE_AND_VERIFIED` | The user supplied the complete output: all seven probes passed; initial and replacement delivery used grounded generation with retrieval and validator `PASS`, while urgent, critical, clarification, refusal, and unsupported probes remained deterministic without LLM calls. |
 | `python scripts/test_phase2_matrix.py` | `COMPLETE_AND_VERIFIED` | All exact roadmap cases passed: `25 of 25`. |
 | `python scripts/measure_phase2_quality.py` | `COMPLETE_AND_VERIFIED` | All 29 metrics were recorded on 36 locked cases and all six portfolio goals passed; prohibited, prompt-injection, sensitive-data, completed-action, and hidden-information rates were zero. |
 | Phase 3 handoff smoke check | `COMPLETE_AND_VERIFIED` | Protected local classification plus `answer`, sync stream, and async stream interfaces returned compatible typed deterministic output. |
@@ -392,6 +723,18 @@ Working directory: `backend/`
   tested seven probes and invoked the real structured Llama path only for
   initial and replacement delivery; urgent, critical, clarification,
   internal-information, and unsupported routes stayed deterministic.
+- On 2026-07-30, the user reran the live pipeline command after Step 11 and
+  supplied output ending in `PASS live classifier-to-answer pipeline checks`.
+  Two later user runs safely rejected nondeterministic delivery generations
+  with `unsupported_guarantee` while routing and retrieval remained valid.
+  The reporting follow-up now labels that contained outcome
+  `PIPELINE_SAFE / GENERATION_REJECTED` without the word `FAIL`, while
+  retaining exit code 1. Seventeen focused service-free tests and the complete
+  777-test non-integration suite passed. The user then supplied a fresh live
+  pair: one complete seven-probe `PASS` run and one safely contained
+  `unsupported_guarantee` run displaying the new
+  `PIPELINE_SAFE / GENERATION_REJECTED` label and strict exit-code-1 notice.
+  Codex did not independently repeat the live command.
 - Step 32's read-only command exercised all 25 exact roadmap queries through
   the protected classifier and complete active pipeline. Six generation cases
   called the real local Llama path; RAG-09's generated output was rejected by
@@ -405,6 +748,10 @@ Working directory: `backend/`
 - Step 34 is pure standard-library code. Its focused, related, and full
   non-integration tests did not contact Ollama, open Chroma, run classifier
   inference, read environment values, or mutate runtime state.
+- Phase 3 Step 11 is service-free. It uses dependency-injected fakes plus real
+  deterministic router/pipeline branches that do not resolve retrieval or
+  generation; it did not contact Ollama, open Chroma, run protected classifier
+  inference, or mutate persistent state.
 - Step 35 exercised the complete approved local stack. After confirming no
   Python/Uvicorn backend or Chroma client process and no stale staging/backup
   directory, the protected rebuild activated and reopened a 67-record store.
@@ -469,9 +816,10 @@ Working directory: `backend/`
 - Live model output and performance timings are machine- and runtime-dependent.
   Performance values are descriptive prototype measurements, not production
   service-level guarantees.
-- Step 26 performs validated buffered delivery rather than live model-token
-  streaming. Phase 3 still owns typed HTTP events, client-disconnection
-  handling, and transport integration.
+- Step 26 and Phase 3 Step 9 perform validated buffered delivery rather than
+  live model-token streaming. The API's explicit disconnect polling owns the
+  post-body ASGI receive channel to avoid competing with Starlette's legacy
+  disconnect-listener path.
 - Callers that need required-policy diversity must pass
   `required_policy_ids`; the argument is optional only to preserve Step 17
   compatibility. The future orchestration pipeline must pass the router's
@@ -494,30 +842,134 @@ Working directory: `backend/`
   and the complete rerun, 25-case matrix, and locked quality measurement all
   passed. Phase 3 must continue treating grounded generation as nondeterministic
   and preserve the existing validated fallback path.
-- The working tree contains extensive uncommitted Phase 2 work. Preserve it and
-  do not create a commit without explicit user instruction.
+- The Phase 3 roadmap source is currently an untracked user file. Preserve it
+  and do not create a commit without explicit user instruction.
 
 ## Next incomplete step
 
-No Phase 2 roadmap step remains incomplete. The next project phase is Phase 3
-backend API integration; it was not started during Step 35.
+Phase 3 Step 12 — complete timeout, cancellation, and disconnect behavior.
 
 ## Compact continuation handoff
 
-- Completed boundary: all Phase 2 Steps 0–35 are
-  `COMPLETE_AND_VERIFIED`; Phase 3 is untouched.
-- Step 35 safely rebuilt and inspected the active 67-record store, retained the
-  calibrated `0.50` threshold, verified the complete local stack, fixed digest
-  disclosure in inspection output, and reduced numeric identifier
-  over-redaction.
-- Final verification: 56 redaction tests, 71 focused compatibility tests, 539
-  non-integration tests, all 542 tests, 3 explicit integrations, 7 live
-  pipeline probes, 25/25 exact matrix cases, and all locked quality goals
-  passed. Four policies, five protected model artifacts, Ollama health,
-  dependency integrity, live retrieval, store integrity, and Phase 3 handoff
-  interfaces passed.
-- Carry-forward risks: local LLM output can vary and Chroma 1.5.9 emits a
-  legacy embedding-function deprecation warning. Existing validation/fallback
-  behavior and pinned-version review must remain in Phase 3.
-- Begin Phase 3 from the documented classifier/pipeline interfaces; preserve
-  all uncommitted Phase 2 work, the protected model, and the active store.
+- Completed boundary: Phase 2 Steps 0–35 and Phase 3 Steps 1–11 are
+  `COMPLETE_AND_VERIFIED`.
+- Step 1 added `ApiSettings`, `load_api_settings(...)`,
+  `validate_api_settings(...)`, module-level `api_settings`, exact
+  `fastapi==0.140.13`/`starlette==1.3.1` pins, reviewed API environment
+  examples, focused tests, and the active Phase 3 execution plan.
+- Configuration is immutable and fail-closed. It reuses the explicit
+  `backend/.env` source with OS precedence and the Phase 2 maximum customer
+  message length without changing `RagSettings`.
+- Step 2 added strict API-only request, chat, error, liveness, readiness, and
+  buffered-SSE payloads plus safe `PipelineAnswer` status/response mappers.
+  Clients can submit only a normalized `message`; public serialization omits
+  reason, retrieval, confidence, prompt, and diagnostic state.
+- Final Step 2 verification: 38 focused contract tests and 648
+  non-integration tests passed. Dependency integrity, compilation, four
+  policies, and five protected model artifacts also passed.
+- Step 3 added `ServiceReadiness`, `ChatExecution`, `ApiChatService`,
+  `AppServices`, `ClassifierCallable`, and stable queue, execution, classifier,
+  pipeline, and shutdown exceptions. One per-application thread pool runs the
+  complete classifier-plus-pipeline job behind an async capacity gate.
+- Timeout and caller cancellation shield the worker and retain its capacity
+  slot until actual completion. Shutdown rejects new work, cancels queued
+  executor work, and waits for running work without clearing Phase 2 caches.
+- Final Step 3 verification: 9 focused service tests, 122 related tests, and
+  657 non-integration tests passed. Dependency integrity, compilation, four
+  policies, and five protected model artifacts also passed.
+- Step 4 added the `create_app(...)` factory, module-level `app`, frozen
+  `ServiceBuilder`, one lifespan-owned `AppServices` container, eager
+  classifier warming, structural manifest/store inspection, bounded optional
+  retriever/embedding/chat initialization, safe degraded readiness, typed
+  application-state dependencies, and executor/state cleanup at shutdown.
+- Final Step 4 verification: 17 focused lifecycle/service tests, 130 related
+  API/async tests, and 665 non-integration tests passed. Dependency integrity,
+  compilation, four policies, and five protected model artifacts also passed.
+- Step 5 added `GET /health/live`, `GET /health/ready`,
+  `OllamaModelAvailability`, and `ReadinessCoordinator`. Readiness coalesces
+  simultaneous checks, applies the configured timeout and monotonic recovery
+  cooldown, retries only failed optional builders, publishes immutable safe
+  snapshots, and never replaces the shared pipeline.
+- Final Step 5 verification: 11 focused tests, 137 related API tests, and 676
+  non-integration tests passed. Dependency integrity, compilation, four
+  policies, and five protected model artifacts also passed.
+- Step 6 added `RequestContextMiddleware`,
+  `ChatRequestControlMiddleware`, restrictive configured CORS, server-owned
+  UUID request state/header propagation, controlled 413/415 JSON payloads,
+  route-safe aggregate log context helpers, and one structured completion log
+  after response completion or disconnect.
+- Final Step 6 verification: 83 focused redaction/middleware tests, 155 related
+  API tests, and 703 non-integration tests passed. Dependency integrity,
+  compilation, four policies, and five protected model artifacts also passed.
+- Step 7 added immutable `ApiFailure` mappings, centralized `ErrorResponse`
+  serialization, safe FastAPI request-validation/HTTP handlers, and
+  `ApiErrorMiddleware` inside CORS and request context. Required 413/415
+  pre-route failures now reuse the same contract.
+- Queue, classifier, execution-timeout, escaped pipeline/component, and
+  unexpected failures map to stable status/code/retryability values. Only a
+  stable internal code reaches aggregate logging; rejected values, locations,
+  exception messages, paths, prompts, and stack traces remain private.
+- Client disconnects produce no response, cancellation/process-control
+  exceptions are re-raised, framework 404/405 responses are controlled, and
+  typed Phase 2 fallback answers remain HTTP 200 with `service_fallback`.
+- Final Step 7 verification: 56 focused error/middleware tests, 122 related API
+  tests, and 732 non-integration tests passed. Dependency integrity,
+  compilation, four policies, and five protected model artifacts also passed.
+- Step 8 added the thin typed `POST /api/v1/chat` route under the configured
+  API prefix. It resolves the shared `ApiChatService`, awaits exactly one
+  classifier-plus-pipeline execution, maps only the returned
+  `PipelineAnswer` through the public mapper, and records only bucketed
+  classification and presentation-safe answer metadata.
+- Grounded, deterministic safety, clarification, unsupported, critical,
+  refusal, unverified-action, account-operation, and Phase 2 safe-fallback
+  answers remain HTTP 200. Existing centralized failures remain controlled
+  500/503/504 responses, while body/media/schema controls remain
+  413/415/422.
+- Final Step 8 verification: 46 focused chat/error tests, 128 related API
+  tests, and 749 non-integration tests passed. Compilation, dependency
+  integrity, four policies, and five protected model artifacts also passed.
+- Step 9 added `POST /api/v1/chat/stream`. It runs the shared bounded service
+  once before headers, maps safe metadata, splits only the approved complete
+  answer with `STREAM_CHUNK_CHARACTERS`, and emits compact `metadata`, ordered
+  `chunk`, and terminal `done` frames with no artificial delay.
+- Pre-stream failures remain controlled JSON HTTP errors. Unexpected
+  post-header delivery failures attempt one stable `stream_interrupted` event;
+  disconnects stop without a terminal frame and cancellation is re-raised.
+  Request-body replay now delegates post-body receive calls to the underlying
+  ASGI channel, and the SSE response gives explicit best-effort polling sole
+  ownership of that channel.
+- Final Step 9 verification: 19 focused streaming tests, 129 related API tests,
+  and 758 non-integration tests passed. Compilation, dependency integrity,
+  four policies, and five protected model artifacts also passed.
+- Step 10 added cross-module assembled-app and OpenAPI coverage. It proves the
+  exact four application paths, lifespan success/shutdown, mandatory and
+  degraded startup behavior, one shared dependency graph, generation-free
+  health checks, strict public schemas, planned response statuses, documented
+  buffered SSE media/events, and absence of internal Phase 2 contracts.
+- Final Step 10 verification: 134 focused tests, 225 complete API tests, and
+  764 non-integration tests passed. Compilation, dependency integrity, four
+  policies, and five protected model artifacts also passed.
+- Step 11 added assembled HTTP validation and privileged-field rejection,
+  selected real deterministic Phase 2 adversarial safety cases, approved and
+  unapproved CORS/preflight coverage, cross-request lifespan dependency reuse,
+  and explicit public-body/aggregate-log leakage assertions. Production code
+  and public contracts did not change.
+- Final Step 11 verification: 101 focused tests, 235 complete API tests, and
+  774 non-integration tests passed. Compilation, dependency integrity, four
+  policies, and five protected model artifacts also passed.
+- After Step 11, `scripts/test_rag_pipeline.py` was improved so a failed live
+  probe reports safe expected-versus-actual mismatches and the final safe
+  execution snapshot instead of only a generic mismatch. Validator-contained
+  generation is typed separately and reported as
+  `PIPELINE_SAFE / GENERATION_REJECTED` with
+  `validator=REJECTED:<code>` and exit code 1; genuine pipeline failures still
+  use `FAIL`. Seventeen focused tests and 777 non-integration tests passed.
+  The user subsequently demonstrated the revised reporting with a complete
+  seven-probe passing run followed by a safely contained
+  `unsupported_guarantee` run.
+- Codex's verification did not exercise a live service, classifier inference,
+  active Chroma access, generation, embedding, running API process, or
+  integration test; the live evidence above came from the user-supplied runs.
+- Continue with Phase 3 Step 12 only; preserve the protected model, active
+  store, Phase 2 safety boundary, ignored local environment, and untracked
+  user-supplied Phase 3 roadmap.
