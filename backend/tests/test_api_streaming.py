@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 from collections.abc import AsyncIterator, Iterator
 from typing import Any
 
@@ -24,16 +25,20 @@ from app.api.models import (
 )
 from app.api.routes import chat as chat_module
 from app.api.services import (
+    ApiChatService,
     ChatExecution,
     PipelineServiceError,
+    ServiceExecutionTimeoutError,
 )
 from app.main import create_app
 from app.ml.rag_pipeline import STREAM_CHUNK_CHARACTERS
+from app.ml.triage_types import ClassificationResult, PipelineAnswer
 from tests.test_api_chat import (
     FakeChatService,
     classification,
     pipeline_answer,
 )
+from tests.test_api_services import FakePipeline, service_settings
 
 
 STREAM_PATH = f"{api_settings.api_prefix}/chat/stream"
@@ -271,6 +276,27 @@ def test_stream_precomputation_failure_is_normal_json_http_error() -> None:
     assert "event:" not in response.text
 
 
+def test_stream_execution_timeout_before_headers_is_json_error() -> None:
+    service = FakeChatService(
+        exception=ServiceExecutionTimeoutError(
+            "private worker detail"
+        )
+    )
+
+    response = _post_with_service(service)
+
+    assert response.status_code == 504
+    assert response.headers["content-type"].startswith("application/json")
+    assert response.json()["error"] == {
+        "code": "request_timeout",
+        "message": "The request timed out. Please try again.",
+        "retryable": True,
+    }
+    assert service.calls == ["Customer message"]
+    assert "private" not in response.text
+    assert "event:" not in response.text
+
+
 @pytest.mark.asyncio
 async def test_stream_disconnect_before_metadata_emits_nothing() -> None:
     request = _request(_flags(True))
@@ -426,6 +452,142 @@ async def test_cancellation_remains_primary_when_polling_is_unsupported(
     ]
     assert "event: done" not in "".join(frames)
     assert "event: error" not in "".join(frames)
+
+
+@pytest.mark.asyncio
+async def test_multiple_buffered_streams_deliver_after_bounded_compute() -> None:
+    running = 0
+    maximum_running = 0
+    counter_lock = threading.Lock()
+    first_started = threading.Event()
+    second_started = threading.Event()
+    release_first = threading.Event()
+    release_second = threading.Event()
+
+    class SequencedPipeline(FakePipeline):
+        def answer(
+            self,
+            *,
+            query: str,
+            classification: ClassificationResult,
+        ) -> PipelineAnswer:
+            nonlocal running, maximum_running
+            with counter_lock:
+                running += 1
+                maximum_running = max(maximum_running, running)
+
+            if query == "First request":
+                first_started.set()
+                assert release_first.wait(timeout=10)
+            elif query == "Second request":
+                second_started.set()
+                assert release_second.wait(timeout=10)
+            else:
+                raise AssertionError("Unexpected test query.")
+
+            try:
+                return super().answer(
+                    query=query,
+                    classification=classification,
+                )
+            finally:
+                with counter_lock:
+                    running -= 1
+
+    pipeline = SequencedPipeline()
+    service = ApiChatService(
+        classifier=lambda _message: classification(),
+        pipeline=pipeline,
+        runtime_settings=service_settings(
+            max_concurrent_requests=1,
+            queue_timeout_seconds=3,
+            request_timeout_seconds=3,
+        ),
+    )
+    first_task = asyncio.create_task(service.execute("First request"))
+    try:
+        assert await asyncio.to_thread(first_started.wait, 2)
+        second_task = asyncio.create_task(
+            service.execute("Second request")
+        )
+        await asyncio.sleep(0)
+        assert not second_started.is_set()
+
+        release_first.set()
+        first_execution = await first_task
+        assert await asyncio.to_thread(second_started.wait, 2)
+        release_second.set()
+        second_execution = await second_task
+
+        delivery_gate = asyncio.Event()
+        delivery_arrivals = 0
+
+        def coordinated_poller():
+            calls = 0
+
+            async def poll() -> bool:
+                nonlocal calls, delivery_arrivals
+                calls += 1
+                if calls == 2:
+                    delivery_arrivals += 1
+                    if delivery_arrivals == 2:
+                        delivery_gate.set()
+                    await delivery_gate.wait()
+                return False
+
+            return poll
+
+        first_request = _request()
+        first_request.is_disconnected = (  # type: ignore[method-assign]
+            coordinated_poller()
+        )
+        second_request = _request()
+        second_request.is_disconnected = (  # type: ignore[method-assign]
+            coordinated_poller()
+        )
+        metadata = StreamMetadataEvent(
+            request_id="request-id",
+            status="answered",
+            response_mode="grounded_generation",
+            risk_level="low",
+            requires_human=False,
+        )
+
+        first_frames, second_frames = await asyncio.gather(
+            _collect(
+                chat_module._stream_approved_answer(
+                    request=first_request,
+                    request_id="request-id",
+                    metadata=metadata,
+                    answer=first_execution.pipeline_answer.answer,
+                )
+            ),
+            _collect(
+                chat_module._stream_approved_answer(
+                    request=second_request,
+                    request_id="request-id",
+                    metadata=metadata,
+                    answer=second_execution.pipeline_answer.answer,
+                )
+            ),
+        )
+    finally:
+        release_first.set()
+        release_second.set()
+        if not first_task.done():
+            first_task.cancel()
+        await service.shutdown()
+
+    assert maximum_running == 1
+    assert [call[0] for call in pipeline.calls] == [
+        "First request",
+        "Second request",
+    ]
+    assert delivery_arrivals == 2
+    for frames in (first_frames, second_frames):
+        assert [
+            name for name, _payload in _parse_sse("".join(frames))
+        ] == ["metadata", "chunk", "done"]
 
 
 def test_stream_route_uses_execute_only_and_not_raw_stream_interfaces() -> None:

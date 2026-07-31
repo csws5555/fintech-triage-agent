@@ -216,9 +216,15 @@ async def test_escaped_pipeline_failures_use_stable_service_exception() -> None:
 async def test_execution_timeout_retains_capacity_until_worker_finishes() -> None:
     first_started = threading.Event()
     release_first = threading.Event()
+    classifier_calls: list[str] = []
+
+    def classifier(message: str) -> ClassificationResult:
+        classifier_calls.append(message)
+        return classification()
+
     pipeline = FakePipeline(started=first_started, release=release_first)
     service = ApiChatService(
-        classifier=lambda _message: classification(),
+        classifier=classifier,
         pipeline=pipeline,
         runtime_settings=service_settings(request_timeout_seconds=1),
     )
@@ -231,7 +237,6 @@ async def test_execution_timeout_retains_capacity_until_worker_finishes() -> Non
             await service.execute("Second request")
 
         release_first.set()
-        await asyncio.sleep(0)
         execution = await service.execute("Third request")
     finally:
         release_first.set()
@@ -239,6 +244,10 @@ async def test_execution_timeout_retains_capacity_until_worker_finishes() -> Non
 
     assert execution.pipeline_answer is pipeline.result
     assert [call[0] for call in pipeline.calls] == [
+        "First request",
+        "Third request",
+    ]
+    assert classifier_calls == [
         "First request",
         "Third request",
     ]
@@ -265,7 +274,6 @@ async def test_cancellation_retains_capacity_until_worker_finishes() -> None:
             await service.execute("Second request")
 
         release_first.set()
-        await asyncio.sleep(0)
         await service.execute("Third request")
     finally:
         release_first.set()
@@ -378,6 +386,46 @@ async def test_shutdown_rejects_new_work_and_waits_for_running_job() -> None:
     await service.shutdown()
 
     assert len(pipeline.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_shutdown_cancels_queued_request_and_awaits_running_job() -> None:
+    running_started = threading.Event()
+    release_running = threading.Event()
+    pipeline = FakePipeline(
+        started=running_started,
+        release=release_running,
+    )
+    service = ApiChatService(
+        classifier=lambda _message: classification(),
+        pipeline=pipeline,
+        runtime_settings=service_settings(
+            queue_timeout_seconds=3,
+            request_timeout_seconds=3,
+        ),
+    )
+    running_task = asyncio.create_task(
+        service.execute("Running request")
+    )
+    assert await asyncio.to_thread(running_started.wait, 2)
+
+    queued_task = asyncio.create_task(service.execute("Queued request"))
+    await asyncio.sleep(0)
+    assert not queued_task.done()
+    assert [call[0] for call in pipeline.calls] == ["Running request"]
+
+    shutdown_task = asyncio.create_task(service.shutdown())
+    await asyncio.sleep(0)
+    assert service.shutdown_started
+    assert not shutdown_task.done()
+
+    release_running.set()
+    await running_task
+    with pytest.raises(ServiceShuttingDownError):
+        await queued_task
+    await shutdown_task
+
+    assert [call[0] for call in pipeline.calls] == ["Running request"]
 
 
 def test_service_readiness_is_strict_and_immutable() -> None:
