@@ -1896,7 +1896,7 @@ Public error:
   "request_id": "fe64a229-1a42-4b38-8c46-d554622154eb",
   "error": {
     "code": "invalid_request",
-    "message": "The request body is invalid.",
+    "message": "The request is invalid.",
     "retryable": false
   }
 }

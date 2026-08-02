@@ -10,15 +10,16 @@ Status vocabulary:
 
 ## Current phase
 
-Phase 3 — FastAPI Backend Integration — active.
+Phase 4 — Frontend Development — in progress.
 
-Phase 2 remains complete and verified through Step 35. Phase 3 Steps 1–11 are
-complete and verified; Step 12 is the next incomplete roadmap step.
+Phase 2 remains complete and verified through Step 35. Phase 3 Steps 1–14 and
+Phase 4 Steps 1–8 are `COMPLETE_AND_VERIFIED`.
 
 Roadmap sources:
 
 - `personal project documentation/phase 2 steps.md`
 - `personal project documentation/phase 3 steps.md`
+- `personal project documentation/phase 4 steps.md`
 
 ## Phase 2 roadmap status
 
@@ -76,9 +77,22 @@ Roadmap sources:
 | 9 — Buffered SSE endpoint | `COMPLETE_AND_VERIFIED` | `POST /api/v1/chat/stream` performs one bounded complete execution before headers, then emits typed metadata, approved 80-character chunks, and a done marker; controlled pre-stream errors, safe post-header errors, disconnects, cancellation, exact framing, and leakage prevention pass focused and full service-free tests. |
 | 10 — Lifecycle, health, configuration, and OpenAPI tests | `COMPLETE_AND_VERIFIED` | Service-free assembled-app tests prove exact route registration, lifespan success/shutdown, mandatory and degraded startup, shared dependency identity, generation-free health checks, strict public OpenAPI schemas/statuses/SSE documentation, and absence of internal Phase 2 contracts. |
 | 11 — Validation, security, CORS, concurrency, and leakage tests | `COMPLETE_AND_VERIFIED` | Service-free assembled HTTP tests reject invalid and server-owned fields, preserve selected real deterministic Phase 2 safety branches, prove exact CORS/no-credentials behavior and shared lifespan dependencies, retain bounded concurrency/queue coverage, and exclude private runtime data from public bodies and aggregate logs. |
-| 12 — Timeout, cancellation, and disconnect behavior | `NOT_STARTED` | Transport cancellation behavior is not in scope yet. |
-| 13 — Real API integration coverage and local runner | `NOT_STARTED` | No runner or API integration test has been added. |
-| 14 — Final verification and Phase 4 handoff | `NOT_STARTED` | Phase 3 is active. |
+| 12 — Timeout, cancellation, and disconnect behavior | `COMPLETE_AND_VERIFIED` | Event-coordinated service and SSE tests prove pre-submission queue timeout, post-submission execution timeout, capacity retention through timeout/cancellation, release only after worker completion, running/queued shutdown behavior, pre-header JSON errors, disconnect-without-terminal delivery, safe post-header errors, cancellation passthrough, and concurrent buffered delivery after bounded compute. |
+| 13 — Real API integration coverage and local runner | `COMPLETE_AND_VERIFIED` | A validated one-worker `app.main:app` runner and separately marked read-only real-lifespan API test pass with the protected classifier, active 67-record Chroma store, approved Nomic/Llama models, readiness, supported JSON generation-or-safe-fallback, deterministic stolen-card SSE, unsupported JSON, generation/validator call tracking, strict public leakage checks, and unchanged manifest. |
+| 14 — Final verification and Phase 4 handoff | `COMPLETE_AND_VERIFIED` | The 2026-07-31 completion audit inspected every Phase 3 source/test/caller, corrected one safe non-guarantee validator false positive and one documented error-message mismatch, then passed 785 service-free tests, 4 live integration tests, the strict seven-probe pipeline, protected baseline, policies, dependencies, live Ollama/store/retrieval checks, and real HTTP/SSE smoke tests. |
+
+## Phase 4 roadmap status
+
+| Step | Status | Repository evidence |
+| --- | --- | --- |
+| 1 — Repository and dependency preparation | `COMPLETE_AND_VERIFIED` | The current React TypeScript Vite scaffold is locked under `frontend/`; the roadmap-required ESLint flat configuration and approved Zustand, Tailwind v4, Vitest/RTL/user-event/axe/coverage, and Playwright dependencies are classified correctly; required scripts and an explicit `RUN_LIVE_API_TESTS` gate exist; Chromium is installed locally; dependency integrity, template lint, production build, and the complete service-free backend regression boundary pass. |
+| 2 — Configuration | `COMPLETE_AND_VERIFIED` | `loadApiConfig(...)` strictly normalizes one public HTTP(S) backend origin and returns only the four fixed Phase 3 endpoint URLs; the reviewed frontend environment example, Tailwind v4 Vite integration, 25 focused tests, lint, production build, and complete service-free backend regression boundary pass. |
+| 3 — API contract types and runtime guards | `COMPLETE_AND_VERIFIED` | Exact readonly TypeScript contracts and handwritten type predicates cover the request, chat, error, liveness, readiness, SSE event names, and four SSE payloads; all public enums, required primitives, exact nested fields, readiness consistency, non-negative integer counts, and internal-looking extra-field rejection pass 56 focused tests, the combined 81-test frontend suite, lint, production build, and the complete service-free backend regression boundary. |
+| 4 — API client | `COMPLETE_AND_VERIFIED` | The injected-fetch typed client owns all four fixed Phase 3 HTTP calls, trims and strictly serializes only `message`, omits credentials, applies caller cancellation and a 100-second timeout, validates status/media type/request IDs/exact payloads, accepts degraded readiness only as HTTP 503, returns only a validated SSE transport for the later parser, and maps configuration, validation, HTTP, network, timeout, cancellation, and malformed responses to safe typed errors. Forty-five focused client tests, the combined 126-test frontend suite, lint, production build, 90 focused backend API tests, and the complete 785-test service-free backend boundary pass. |
+| 5 — Streaming parser | `COMPLETE_AND_VERIFIED` | The API client now consumes POST-based buffered SSE through an incremental fatal UTF-8 decoder and strict frame parser; LF/CRLF/CR framing, arbitrary byte fragmentation, split Unicode, multiple frames per read, comments, exact event payloads, metadata-first ordering, contiguous sequences, response/event request-ID equality, terminal exclusivity, done counts, clean EOF, interruptions, cancellation, and stream-duration timeout behavior pass 37 parser and 47 client tests. The complete 165-test frontend suite, lint, production build, and complete 785-test service-free backend boundary pass. |
+| 6 — State management | `COMPLETE_AND_VERIFIED` | Readonly UI-only chat contracts, the explicit request transition table, and an injected-client vanilla Zustand store own availability, one active operation, in-memory turns, streaming metadata/chunks, cancellation, failure, retry, and clear semantics. Frontend-only operation IDs are never passed to the API; stale, out-of-order, mismatched, and terminal callbacks cannot mutate state; retries reuse a turn without duplicating the user message; clear aborts before removing memory. Thirty-six focused tests, about 94% focused statement coverage, the complete 201-test frontend suite, TypeScript checking, lint, and production build pass. |
+| 7 — Base UI | `COMPLETE_AND_VERIFIED` | The single-page React shell now constructs the production injected-client store, performs one guarded startup readiness check, and presents checking, ready, optional-only degraded, and unavailable states through text, icons, safe public component details, and explicit connection retry. The error boundary, local fictional-prototype identity, account-action limitations, secret-entry warning, skip link, reduced-motion rule, responsive Tailwind v4 styling, and memory-only notice pass 6 focused component tests, focused coverage, the complete 207-test frontend suite, TypeScript checking, clean source lint, and production build. |
+| 8 — Message and composer components | `COMPLETE_AND_VERIFIED` | The chat page now renders an ordered memory-only transcript, inert customer/assistant text, stateless-request guidance, an accessible confirmed Clear conversation action, automatic transcript scrolling, and a labelled composer with a normalized 2,000-character counter, inline validation, Enter submission, Shift+Enter newlines, IME protection, and active-request duplicate prevention. Eighteen focused component/axe tests, the complete 220-test frontend suite, TypeScript checking, clean source lint, production build, Vite startup, and the complete 785-test backend service-free boundary pass. |
 
 No roadmap step is currently `PARTIAL` or `BLOCKED`.
 
@@ -312,7 +326,581 @@ paths, stack traces, authorization headers, client request IDs, and secrets.
 No live Ollama, Chroma, classifier inference, generation, embedding, running
 server, integration test, or persistent-store operation was run.
 
+### Phase 3 Step 12 verification
+
+| Command | Result |
+| --- | --- |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_services.py tests/test_api_streaming.py` | The pre-edit baseline invocation was terminated by the command wrapper at 120.6 seconds after pytest printed `18 passed`; the process result was not counted as a pass. The final post-edit run was `COMPLETE_AND_VERIFIED` — 21 passed in 98.47s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_services.py tests/test_api_streaming.py --durations=15` | `COMPLETE_AND_VERIFIED` — 21 passed in 17.05s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_app.py tests/test_api_chat.py tests/test_api_config.py tests/test_api_errors.py tests/test_api_health.py tests/test_api_middleware.py tests/test_api_models.py tests/test_api_openapi.py tests/test_api_services.py tests/test_api_streaming.py` | `COMPLETE_AND_VERIFIED` — 238 passed in 20.66s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exit code 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 780 passed, 3 deselected in 22.70s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 12 changes tests and continuity documentation only. Existing
+production code already shields submitted worker futures, releases capacity
+from the actual future-completion callback, rejects work after shutdown starts,
+awaits running executor work, returns controlled pre-header errors, polls
+stream disconnect state, and re-raises cancellation. The added event-coordinated
+matrix proves queued work never reaches classifier/pipeline execution during
+shutdown, streaming execution timeout remains a JSON HTTP 504, and multiple
+approved buffered streams can deliver concurrently after compute without
+exceeding compute concurrency. No live Ollama, Chroma, protected-classifier
+inference, generation, embedding, running server, integration test, or
+persistent-store operation was run.
+
+### Phase 3 Step 13 verification
+
+| Command | Result |
+| --- | --- |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_app.py tests/test_api_chat.py tests/test_api_config.py tests/test_api_errors.py tests/test_api_health.py tests/test_api_middleware.py tests/test_api_models.py tests/test_api_openapi.py tests/test_api_services.py tests/test_api_streaming.py` | Pre-edit service-free boundary `COMPLETE_AND_VERIFIED` — 238 passed in 19.50s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — both the initial post-edit and final invocations exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration" tests/test_api_integration.py` | `COMPLETE_AND_VERIFIED` — the runner test passed, with the live API test deselected, in 13.57s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts/check_ollama.py` | `COMPLETE_AND_VERIFIED` — approved loopback Ollama, both allowlisted models/digests, one embedding, and one bounded generation passed. |
+| `.\venv\Scripts\python.exe scripts/inspect_vector_store.py` | `COMPLETE_AND_VERIFIED` before and after API integration — 67 cosine records, four approved policies, matching schema-version-2 manifest, and no integrity failures. |
+| `.\venv\Scripts\python.exe -m pytest -q -m integration tests/test_api_integration.py` | The first invocation failed only the added byte-for-byte store snapshot assertion after Chroma 1.5.9 rewrote HNSW `data_level0.bin` during query-only access; all real HTTP route assertions had passed. The corrected roadmap-level boundary passed 1 integration test with 1 runner test deselected in 45.12s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration" tests/test_api_app.py tests/test_api_chat.py tests/test_api_config.py tests/test_api_errors.py tests/test_api_health.py tests/test_api_integration.py tests/test_api_middleware.py tests/test_api_models.py tests/test_api_openapi.py tests/test_api_services.py tests/test_api_streaming.py` | `COMPLETE_AND_VERIFIED` — 239 passed, 1 live test deselected in 41.02s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 781 passed, 4 integration tests deselected in 45.89s; one upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Phase 3 Step 13 adds `run_local_api(...)` and the documented
+`python scripts/run_api.py` entry point. It validates the immutable API
+settings, targets `app.main:app`, disables reload, and supplies exactly one
+Uvicorn worker. The integration marker now covers approved loopback Ollama,
+protected-classifier inference, read-only active-store use, and temporary
+stores. The real application lifespan reported every readiness component
+available. Its supported JSON request called the real grounding prompt,
+structured generator, and output validator and safely returned the approved
+post-validation fallback during the passing run. The stolen-card buffered SSE
+and unsupported JSON requests made no generation call. Public payloads and SSE
+frames contained only their allowlisted contracts, the active manifest hash
+did not change, and post-run logical store inspection passed.
+
+The implementation did not start Ollama, pull models, rebuild or swap Chroma,
+modify the manifest, alter policies, or save the classifier. Chroma 1.5.9 did
+rewrite bytes in its HNSW `data_level0.bin` while serving query-only access;
+the known-risk section records this distinction between query-only API use and
+filesystem-level immutability.
+
+### Phase 3 Step 14 verification
+
+Working directory for every command: `backend/`.
+
+| Command | Result |
+| --- | --- |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 781 passed, 4 integration tests deselected in 22.79s; one known upstream TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+| `.\venv\Scripts\python.exe scripts\check_ollama.py` | `COMPLETE_AND_VERIFIED` — approved loopback Ollama, both allowlisted models and digests, one embedding, one bounded generation, and the no-cloud invariant passed. |
+| `.\venv\Scripts\python.exe scripts\inspect_vector_store.py` | `COMPLETE_AND_VERIFIED` before and after the live/API sequence — the active schema-version-2 cosine store contained 67/67 records from four approved policies with no duplicates, unsafe records, manifest mismatches, or integrity failures. |
+| `.\venv\Scripts\python.exe scripts\test_retrieval.py` | `COMPLETE_AND_VERIFIED` — all 6 read-only retrieval invariants passed. |
+| `.\venv\Scripts\python.exe scripts\test_rag_pipeline.py` | The first two invocations exited 1 after output validation safely rejected a nondeterministic `unsupported_guarantee` and returned the approved fallback. The third unchanged invocation was `COMPLETE_AND_VERIFIED` — all 7 classifier-to-answer probes passed in 82.3s, including 2 validated generated responses and 5 deterministic no-LLM routes. |
+| `.\venv\Scripts\python.exe -m pytest -q -m integration` | `COMPLETE_AND_VERIFIED` — 4 passed, 781 deselected in 62.81s; one known TestClient and three known Chroma legacy-configuration deprecation warnings. |
+| Start `scripts/run_api.py` with the backend virtual-environment interpreter, then request `GET /health/live` and `GET /health/ready` | `COMPLETE_AND_VERIFIED` — the real one-worker process returned `alive` and all six readiness components `ready`. |
+| Five real `POST /api/v1/chat` smoke requests | `COMPLETE_AND_VERIFIED` — supported delivery returned grounded `answered`; stolen-card returned deterministic high-risk `safety_guidance`; mortgage returned `unsupported`; prompt disclosure returned `request_refused`; account-action status returned `action_not_confirmed`. |
+| PowerShell-native `POST /api/v1/chat/stream` with `Accept: text/event-stream` | `COMPLETE_AND_VERIFIED` — HTTP 200 returned `metadata`, 3 ordered validated chunks, and `done`; reconstructed replacement-delivery guidance was safe. |
+| Literal roadmap `curl.exe ... --data-binary '{"message":...}'` under Windows PowerShell | Failed with a controlled 422 `invalid_request` because native argument quoting altered the JSON. The PowerShell-native request above verified the same endpoint, and README records that working Windows command. |
+| Stop the validated smoke-test Python parent/child processes and probe `/health/live` | `COMPLETE_AND_VERIFIED` — the endpoint became unreachable. |
+
+Step 14 changes no application, test, configuration, policy, model, manifest,
+or vector-store interface. `README.md` now documents all twelve Phase 3
+environment variables; one-worker startup and lifespan behavior; local model,
+classifier, and active-store prerequisites; liveness/readiness semantics;
+strict JSON, error, and buffered-SSE contracts; service-free and live checks;
+and the required prototype limitations. Streaming is explicitly documented as
+delivery of a complete validated answer rather than raw model tokens.
+
+The release sequence did not start Ollama, pull models, rebuild/swap Chroma,
+modify the active manifest, change policies, retrain/save the classifier, or
+begin Phase 4. The API was started only for manual verification and stopped
+afterward.
+
+### Phase 3 completion audit verification — 2026-07-31
+
+The audit reconciled all fourteen roadmap steps with the implemented API,
+eleven API test modules, Phase 2 safety seams, local runner, OpenAPI output,
+callers/imports, and current live stack. Three consecutive pre-fix
+`scripts/test_rag_pipeline.py` runs safely fell back because the validator
+misclassified “Delivery times are estimates rather than guarantees” as an
+unsupported guarantee. A narrow safe-negation correction and four regression
+cases now accept that explicit limitation while still rejecting a separate
+guarantee or future arrival promise. README and the roadmap's error example
+were also corrected to the implemented 422 message, “The request is invalid.”
+
+| Command | Result |
+| --- | --- |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_config.py tests/test_api_models.py tests/test_api_services.py tests/test_api_app.py tests/test_api_health.py tests/test_api_middleware.py tests/test_api_errors.py tests/test_api_chat.py tests/test_api_streaming.py tests/test_api_openapi.py` | `COMPLETE_AND_VERIFIED` — 238 passed in 39.61s; one known TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_output_validator.py tests/test_rag_pipeline.py tests/test_live_rag_pipeline_script.py tests/test_api_models.py tests/test_api_errors.py tests/test_api_chat.py tests/test_api_streaming.py` | `COMPLETE_AND_VERIFIED` — 263 passed in 36.79s; one known TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed, 4 integration tests deselected in 49.70s; one known TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m pytest -q -m integration` | `COMPLETE_AND_VERIFIED` — 4 passed, 785 deselected in 62.10s; one known TestClient and three known Chroma legacy-configuration deprecation warnings. |
+| `.\venv\Scripts\python.exe scripts/check_ollama.py` | `COMPLETE_AND_VERIFIED` — all 8 approved loopback/model/digest/embedding/generation/no-cloud checks passed. |
+| `.\venv\Scripts\python.exe scripts/inspect_vector_store.py` | `COMPLETE_AND_VERIFIED` — 67/67 cosine records from four approved policies, with no duplicates, unsafe records, manifest mismatches, or integrity failures. |
+| `.\venv\Scripts\python.exe scripts/test_retrieval.py` | `COMPLETE_AND_VERIFIED` — all 6 live retrieval invariants passed. |
+| `.\venv\Scripts\python.exe scripts/test_rag_pipeline.py` | `COMPLETE_AND_VERIFIED` after the validator correction — all 7 strict classifier-to-answer probes passed; both generated answers validated and all 5 deterministic routes avoided the LLM. |
+| Live loopback health, OpenAPI, five JSON branches, and replacement-delivery SSE requests | `COMPLETE_AND_VERIFIED` — liveness/readiness and exact public contracts passed; SSE returned metadata, 3 ordered chunks, and done. The matching server was already running and was left running because the audit did not start or own it. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe scripts/verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts/validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policies validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+No further Phase 3 implementation or test-coverage gap was found. Phase 3
+remains `COMPLETE_AND_VERIFIED`.
+
+### Phase 4 Step 1 verification
+
+Phase 4 Step 1 initialized the previously empty `frontend/` directory from
+the current official React TypeScript Vite template. A follow-up compatibility
+correction replaced that template's newer Oxlint baseline with the roadmap's
+required ESLint flat configuration. No API configuration, Tailwind
+integration, runtime contract, API client, SSE parser, Zustand store, product
+component, Playwright configuration, or frontend test was started.
+
+Resolved direct runtime versions are React 19.2.8, React DOM 19.2.8, and
+Zustand 5.0.14. The locked direct development baseline is Playwright 1.62.1,
+Tailwind CSS and its Vite integration 4.3.3, Vitest and coverage-v8 4.1.10,
+React Testing Library 16.3.2, jest-dom 7.0.0, user-event 14.6.1, axe-core
+4.12.1, vitest-axe 0.1.0, jsdom 29.1.1, Vite 8.2.0, TypeScript 6.0.3,
+ESLint 10.8.0, `@eslint/js` 10.0.1, `typescript-eslint` 8.65.0,
+`eslint-plugin-react-hooks` 7.1.1, `eslint-plugin-react-refresh` 0.5.3,
+`globals` 17.8.0, and the scaffold-selected React/Vite type and plugin
+packages.
+
+| Command | Result |
+| --- | --- |
+| `node --version` | `COMPLETE_AND_VERIFIED` — `v22.13.0`. |
+| `npm.cmd --version` | `COMPLETE_AND_VERIFIED` — `10.9.2`. |
+| `npm.cmd create vite@latest . -- --template react-ts` | The sandboxed attempt could not reach the npm registry; the approved network-enabled rerun succeeded with `create-vite@9.1.2`. |
+| `npm.cmd install` | The sandboxed attempt timed out before completion; the approved network-enabled rerun installed and audited the scaffold successfully with zero vulnerabilities. |
+| `npm.cmd install zustand` | `COMPLETE_AND_VERIFIED` — installed as the only added runtime dependency; audit reported zero vulnerabilities. |
+| `npm.cmd install --save-dev tailwindcss @tailwindcss/vite` | `COMPLETE_AND_VERIFIED` — installed the approved Tailwind v4 development tooling; audit reported zero vulnerabilities. |
+| `npm.cmd install --save-dev vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event axe-core vitest-axe @vitest/coverage-v8` | `COMPLETE_AND_VERIFIED` — installed the approved unit, DOM, accessibility, and coverage tooling; audit reported zero vulnerabilities. |
+| `npm.cmd install --save-dev @playwright/test` | `COMPLETE_AND_VERIFIED` — installed the approved browser test runner; audit reported zero vulnerabilities. |
+| `npx.cmd playwright install chromium` | The sandboxed attempt was denied access to the user-local Playwright directory; the approved rerun installed Chromium 151.0.7922.34 plus its required local support binaries. |
+| `npm.cmd run lint` | `COMPLETE_AND_VERIFIED` — the final ESLint flat configuration exited 0. |
+| `npm.cmd run build` | `COMPLETE_AND_VERIFIED` — TypeScript project compilation and the Vite 8.2.0 production build exited 0; generated `dist/` remains ignored. |
+| `npm.cmd ls --depth=0` | `COMPLETE_AND_VERIFIED` — all declared direct packages resolved without missing, invalid, or extraneous dependencies. |
+| Focused Node manifest/lock assertion | `COMPLETE_AND_VERIFIED` — required scripts, exact coverage command, live-test environment gate, dependency classification, and root lock entries matched. The preceding PowerShell `ConvertFrom-Json` attempt could not parse the lock file's empty root-package property and was replaced by this passing Node assertion. |
+| `npm.cmd uninstall oxlint` | `COMPLETE_AND_VERIFIED` — removed the obsolete generated lint package and its lock entries. |
+| `npm.cmd install --save-dev eslint @eslint/js globals eslint-plugin-react-hooks eslint-plugin-react-refresh typescript-eslint` | `COMPLETE_AND_VERIFIED` — installed and locked the roadmap-required ESLint flat-config stack as development-only dependencies; audit reported zero vulnerabilities. |
+| Focused ESLint manifest/lock/config assertion | `COMPLETE_AND_VERIFIED` — ESLint dependencies, `eslint .` script, `eslint.config.js`, and complete Oxlint removal matched. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — the final ESLint-correction regression run passed 785 tests with 4 deselected in 47.50s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Step 1 required no running frontend, FastAPI process, classifier inference,
+Chroma access, Ollama access, live integration test, unit/component test, or
+Playwright browser workflow. Chromium was installed, but no browser or visual
+verification was run because this step adds no product behavior. Phase 4
+Step 2 was the next incomplete step at that boundary.
+
+### Phase 4 Step 2 verification
+
+Phase 4 Step 2 adds the immutable `ApiConfig` frontend contract and
+`loadApiConfig(...)`. Production loading reads
+`import.meta.env.VITE_API_BASE_URL`; tests may inject an environment mapping.
+Absent or blank values use `http://127.0.0.1:8000`. Valid HTTP(S) origins are
+normalized through `URL`, while malformed or relative URLs, non-HTTP schemes,
+credentials, queries, fragments, invalid ports, and embedded paths fail
+closed without including the rejected value in the error. The returned object
+contains only `baseUrl`, `livenessUrl`, `readinessUrl`, `chatUrl`, and
+`chatStreamUrl`, is frozen, and joins only the four source-authoritative Phase
+3 paths.
+
+`frontend/.env.example` documents only the public backend origin. Tailwind CSS
+v4 is registered through `@tailwindcss/vite`; no Vite proxy, secret setting,
+API client, runtime response guard, SSE parser, Zustand store, product
+component, or browser persistence was added.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/api/__tests__/config.test.ts` | `COMPLETE_AND_VERIFIED` — 1 file and 25 tests passed in 352ms. |
+| `npm.cmd run lint` | `COMPLETE_AND_VERIFIED` — ESLint exited 0. |
+| `npm.cmd run build` | `COMPLETE_AND_VERIFIED` — TypeScript project compilation and Vite 8.2.0 production build exited 0; 20 modules transformed and ignored `dist/` output was generated. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed, 4 deselected in 46.25s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Step 2 required no running frontend or FastAPI process, classifier inference,
+Chroma access, Ollama access, live integration test, Playwright workflow, or
+visual browser verification. Configuration has no meaningful visible product
+interface yet; Phase 4 Step 3 will add the public API contract types and
+runtime guards that consume this configuration boundary.
+
+### Phase 4 Step 3 verification
+
+Phase 4 Step 3 adds readonly frontend contracts for `ChatRequest`,
+`ChatResponse`, `ErrorDetail`, `ErrorResponse`, `LivenessResponse`,
+`ReadinessComponents`, `ReadinessResponse`, `StreamMetadataEvent`,
+`StreamChunkEvent`, `StreamDoneEvent`, and `StreamErrorEvent`. It also exposes
+the exact public status, response-mode, risk, readiness, component, and SSE
+event-name literals plus the verified 2,000-character normalized request
+limit. No internal Phase 1 or Phase 2 metadata is represented.
+
+Handwritten runtime type predicates reject non-objects, missing or extra
+fields, type coercion, invalid enum values, blank required strings, negative or
+fractional stream counts, inconsistent readiness status/components, and extra
+internal-looking fields at both envelope and nested-object levels. HTTP 200
+ready and HTTP 503 degraded responses use the same guarded
+`ReadinessResponse` contract. Test fixtures encode one valid instance of every
+payload and SSE event.
+
+No dependency, configuration, API-client, error-normalization, SSE framing or
+ordering parser, Zustand store, hook, component, style, or backend production
+interface changed.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/api/__tests__/contractGuards.test.ts` | Initial implementation run passed 1 file and 55 tests in 378ms; the final event-name-complete run passed 1 file and 56 tests. |
+| `npm.cmd run build` | Initial run failed on one TypeScript narrowing error in `isReadinessResponse`; after retaining the guarded components value, the final run passed TypeScript project compilation and Vite 8.2.0 production build with 20 modules transformed. |
+| `npm.cmd run lint` | Initial surfaced run found two unused test destructuring bindings; after replacing them with explicit exact-shape fixtures, the final run exited 0. |
+| `npm.cmd run test -- src/api/__tests__/config.test.ts src/api/__tests__/contractGuards.test.ts` | Initial combined run passed 2 files and 80 tests in 393ms; the final run passed 2 files and 81 tests. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_models.py tests/test_api_openapi.py` | `COMPLETE_AND_VERIFIED` — 43 source-authoritative backend contract tests passed in 42.92s. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed, 4 deselected in 64.29s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+Step 3 required no running frontend or FastAPI process, classifier inference,
+Chroma access, Ollama access, live integration test, Playwright workflow, or
+visual browser verification. These isolated contracts have no meaningful
+visible product interface; Phase 4 Step 4 will consume them in the API client.
+
+### Phase 4 Step 4 verification
+
+Phase 4 Step 4 adds `ApiClientError`, its seven stable failure kinds, and the
+injected-fetch `createApiClient({ baseUrl, fetchImpl })` factory. The immutable
+client exposes `checkLiveness(...)`, `checkReadiness(...)`,
+`sendChatMessage(...)`, and `streamChatMessage(...)`. It reuses the Step 2
+configuration URLs and Step 3 exact-shape guards; sends endpoint-specific
+`Accept` and `Content-Type` headers with `credentials: "omit"`; never sends a
+client request ID; trims and validates one customer `message`; and preserves
+the separate backend-authoritative HTTP 413 boundary.
+
+Every call composes an optional caller `AbortSignal` with a 100-second client
+timeout. JSON and pre-header streaming failures are normalized without copying
+raw response bodies, fetch exceptions, local URLs, abort reasons, or stack
+traces into presentation-safe error messages. Valid server `ErrorResponse`
+messages and `retryable` values are preserved only after exact-shape,
+content-type, and header/body request-ID validation. Readiness accepts HTTP 200
+only with a ready payload and HTTP 503 only with a degraded payload.
+
+The Step 4 `streamChatMessage(...)` boundary performs the POST and validates
+HTTP status, `text/event-stream`, `X-Request-ID`, pre-header JSON errors, and a
+non-null `ReadableStream`. It returns immutable `OpenChatStream` transport
+metadata and does not decode bytes, parse SSE frames, invoke event handlers, or
+enforce event ordering; those behaviors remain exclusively Phase 4 Step 5,
+which will modify the client to consume the parser. No `EventSource`,
+`TextDecoder`, stream reader, parser scaffold, state, hook, component, style,
+backend change, or dependency was added.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/api/__tests__/client.test.ts` | The first run executed 45 tests: 43 passed and 2 failed because this Vitest setup does not provide the `toBeFrozen` matcher. After replacing those test-only assertions and correcting one missing `async`, the final focused run passed 1 file and all 45 tests in 744ms. |
+| `npm.cmd run lint` | An intermediate run found one `no-unexpected-multiline` formatting error in the new parameterized test. After correction, the final run exited 0. |
+| `npm.cmd run build` | An intermediate run found two test-only TypeScript control-flow errors around a signal assigned inside a mock callback. After asserting through the recorded fetch call, the final TypeScript project compilation and Vite 8.2.0 production build exited 0 with 20 modules transformed. |
+| `npm.cmd run test -- src/api/__tests__/config.test.ts src/api/__tests__/contractGuards.test.ts src/api/__tests__/client.test.ts` | `COMPLETE_AND_VERIFIED` — 3 files and 126 tests passed in 578ms before the final abort-precedence refinement. |
+| `npm.cmd run test` | `COMPLETE_AND_VERIFIED` — the final complete frontend suite passed 3 files and 126 tests in 618ms. |
+| `.\venv\Scripts\python.exe -m pytest -q tests/test_api_models.py tests/test_api_health.py tests/test_api_chat.py tests/test_api_streaming.py tests/test_api_openapi.py` | `COMPLETE_AND_VERIFIED` — 90 source-authoritative backend API contract, health, JSON chat, buffered-SSE, and OpenAPI tests passed in 46.52s with one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed and 4 integration tests were deselected in 59.41s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+| `git diff --check` | `COMPLETE_AND_VERIFIED` — exited 0; Git printed only existing line-ending and inaccessible user-global-ignore warnings. |
+| `git status --short` | Inspected after implementation; the pre-existing tracked documentation changes and untracked Phase 4 roadmap/frontend tree remain, with no protected model, policy, runtime-store, environment, dependency-manifest, or backend source change introduced by Step 4. |
+
+Step 4 required no running frontend or FastAPI process, classifier inference,
+Chroma client, Ollama access, integration test, Playwright workflow, or visual
+browser verification. No meaningful browser verification is required for this
+isolated client boundary; Phase 4 Step 9 will first connect the validated
+streaming client path to the visible application.
+
+### Phase 4 Step 5 verification
+
+Phase 4 Step 5 adds the standalone `parseSseStream(...)` byte-stream parser
+and integrates it into the existing `streamChatMessage(...)` client method.
+The client no longer returns an open transport. It accepts validated
+`onMetadata` and `onChunk` handlers, keeps caller cancellation and the
+100-second timeout active while reading the response body, and resolves only
+with an immutable `CompletedStream` after `done` and a clean EOF.
+
+One fatal streaming `TextDecoder` preserves UTF-8 characters split across
+network reads and rejects malformed bytes. The parser accepts LF, CRLF, and CR
+line endings, retains incomplete text and frames, handles multiple frames per
+read, and ignores comment lines. Every non-comment frame must contain exactly
+one `event` and one JSON `data` field. Existing exact-shape guards validate the
+four public payloads before callbacks receive them.
+
+The parser requires exactly one metadata event before chunks or a terminal
+event; contiguous chunk sequences starting at zero; equality between every
+event request ID and the response header request ID; and a `done.chunks` value
+matching accepted chunks. A clean successful stream requires `done` and EOF.
+Validated terminal `error` events preserve only their public safe error,
+unexpected EOF/reader failures become retryable interruption errors, malformed
+protocol becomes a non-retryable invalid-response error, cancellation cancels
+the active reader, and any event after `done` or `error` is rejected. Approved
+metadata and chunks already delivered before interruption remain available to
+later state management; no Step 6 store or state behavior was started.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/api/__tests__/sseParser.test.ts src/api/__tests__/client.test.ts` | Initial implementation run passed 2 files and 82 tests. After adding stream-duration timeout/cancellation coverage, one synchronization-sensitive assertion failed while the other 83 tests passed; after waiting for body reading to begin, the final focused run passed 2 files and all 84 tests in 516ms. |
+| `npm.cmd run lint` and `npm.cmd run build` | The first combined invocation surfaced three TypeScript control-flow errors in the build; the parallel wrapper did not preserve a separate lint result. After retaining an explicitly narrowed terminal value, the next lint exited 0 and the build passed with 20 modules transformed. The final lint again exited 0, and the final production build again passed with 20 modules transformed. |
+| `npm.cmd run test` | `COMPLETE_AND_VERIFIED` — the complete frontend suite passed 4 files and 165 tests in 592ms. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed and 4 integration tests were deselected in 25.73s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+| `git diff --check` | `COMPLETE_AND_VERIFIED` — exited 0; Git printed only existing line-ending and inaccessible user-global-ignore warnings. |
+| `git status --short` | Inspected before and after documentation update; the pre-existing tracked documentation changes and untracked Phase 4 roadmap/frontend tree remain, with no protected model, policy, runtime-store, environment, dependency-manifest, or backend source change introduced by Step 5. |
+
+Step 5 added no dependency and required no running frontend or FastAPI
+process, classifier inference, Chroma client, Ollama access, integration test,
+Playwright workflow, or visual browser verification. No meaningful browser
+verification is required for this isolated parser/client boundary; Phase 4
+Step 9 will first connect it to the visible application.
+
+### Phase 4 Step 6 verification
+
+Phase 4 Step 6 adds readonly UI-only chat, delivery, request-phase,
+availability, input-error, and safe request-error contracts; a pure explicit
+request transition table; and `createChatStore(...)`, a vanilla Zustand store
+factory with injected `ApiClient`, ID factory, and abort-controller factory.
+No React hook, component, style, API contract, parser behavior, dependency, or
+backend file changed.
+
+The store starts with an empty memory-only conversation and checks readiness
+through the typed client. It enables work only for fully ready or
+optional-only degraded readiness, permits one active request, creates local
+operation/turn/message IDs, sends only normalized customer text through the
+existing client, and independently checks metadata acceptance, request IDs,
+chunk sequence, and completion counts. Terminal operations clear transient
+controllers and identifiers. Partial validated text becomes interrupted on
+failure, cancellation cannot become completion, unknown failures are reduced
+to a fixed safe error, and late or stale callbacks return without mutation.
+
+Retry reuses the original turn and user message while resetting the assistant
+placeholder, so it cannot duplicate customer text. Clear aborts active work
+before removing the in-memory transcript and preserves the current
+availability snapshot. No Web Storage, IndexedDB, URL, logging, analytics, or
+telemetry integration was added.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd test -- src/features/chat/__tests__/chatStateMachine.test.ts src/features/chat/__tests__/chatStore.test.ts; npm.cmd exec -- tsc -p tsconfig.app.json --noEmit` | Initial run timed out after 30 seconds because the test helper accidentally awaited the intentionally pending stream; TypeScript did not run in that timed-out command. The helper was corrected to return the pending promise without assimilating it. |
+| `npm.cmd test -- src/features/chat/__tests__/chatStateMachine.test.ts src/features/chat/__tests__/chatStore.test.ts` | `COMPLETE_AND_VERIFIED` — final focused run passed 2 files and 36 tests. |
+| `npm.cmd exec -- tsc -p tsconfig.app.json --noEmit` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `npm.cmd run lint` | `COMPLETE_AND_VERIFIED` — exited 0. |
+| `npm.cmd test` | `COMPLETE_AND_VERIFIED` — the complete frontend suite passed 6 files and 201 tests in 543ms. |
+| `npm.cmd run test:coverage -- src/features/chat/__tests__/chatStateMachine.test.ts src/features/chat/__tests__/chatStore.test.ts` | `COMPLETE_AND_VERIFIED` — 2 files and 36 tests passed; focused coverage was 93.97% statements, 90.97% branches, 97.56% functions, and 93.93% lines. |
+| `npm.cmd run build` | `COMPLETE_AND_VERIFIED` — TypeScript project build and Vite production build passed with 20 modules transformed. |
+
+Step 6 required no running frontend or FastAPI process, classifier inference,
+Chroma access, Ollama access, backend regression, integration test,
+Playwright workflow, or visual browser verification. No meaningful browser
+verification is required for this isolated store layer; Phase 4 Step 7 will
+first expose base frontend state and Phase 4 Step 9 will connect streaming.
+
+### Phase 4 Step 7 verification
+
+Phase 4 Step 7 replaces the Vite starter screen with the single-page product
+shell. `App` creates the existing injected-client Zustand store from the
+validated public base URL, while `ChatPage` starts one readiness check and
+selects availability, public readiness components, and presentation-safe
+errors from that store. `ServiceStatus` renders checking, ready, limited, and
+unavailable states with visible text in addition to color, exposes only the
+six public readiness component fields, and offers an explicit connection
+retry only when unavailable.
+
+The shell identifies itself as a local fictional portfolio prototype, states
+that it cannot access accounts or perform or confirm account actions, warns
+against entering authentication secrets, documents its selected support
+scope, exposes a keyboard skip link, and states that conversation data is
+memory-only. The top-level error boundary replaces rendering or public
+configuration failures with a generic accessible fallback and does not copy
+exception details into the DOM. Tailwind v4 supplies the component styling;
+the global stylesheet supplies the 320-pixel floor, safe word wrapping,
+visible focus treatment, and reduced-motion behavior.
+
+No API contract, API-client method, SSE parser behavior, Zustand state or
+action, backend file, dependency, lockfile, environment value, classifier,
+policy, Chroma store, or Ollama state changed. Component tests use jsdom only
+for their own files so the existing Node byte-stream parser tests retain their
+source environment. Generated frontend coverage is now explicitly ignored by
+Git and ESLint.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/features/chat/__tests__/ChatPage.test.tsx src/__tests__/AppErrorBoundary.test.tsx` | `COMPLETE_AND_VERIFIED` — 2 files and 6 focused component tests passed. |
+| `npm.cmd exec -- tsc -p tsconfig.app.json --noEmit` | `COMPLETE_AND_VERIFIED` — final TypeScript application check exited 0. |
+| `npm.cmd run lint` | The first two runs exited 0 with three warnings from generated coverage helper scripts. After adding the already-required coverage ignore, the final run exited 0 without warnings. |
+| `npm.cmd run build` | `COMPLETE_AND_VERIFIED` — final TypeScript project build and Vite 8.2.0 production build passed with 30 modules transformed. |
+| `npm.cmd run test` | The first full run exposed 10 existing parser/client failures caused by an overly broad jsdom setting. After scoping jsdom to the two component-test files, the final run passed 8 files and all 207 tests. |
+| `npm.cmd run test:coverage -- src/features/chat/__tests__/ChatPage.test.tsx src/__tests__/AppErrorBoundary.test.tsx` | `COMPLETE_AND_VERIFIED` — 2 files and 6 tests passed; the new chat-component directory reported 95.45% statements, 93.75% branches, 100% functions, and 95.23% lines. |
+| `npm.cmd run dev -- --host 127.0.0.1` | `COMPLETE_AND_VERIFIED` for startup only — Vite 8.2.0 reported ready in 564 ms at `http://127.0.0.1:5173/`; the temporary process was stopped and the endpoint was confirmed unreachable afterward. |
+
+The available in-app browser skill was initialized for localhost inspection,
+but its runtime reported no available browser backend. No page, screenshot,
+visual breakpoint, keyboard workflow, Playwright test, mocked browser test, or
+live frontend-backend integration was therefore claimed as verified. Step 7
+does not require FastAPI, the protected classifier, Chroma, or Ollama for its
+focused service-free tests. Live ready/degraded rendering remains a later
+manual or browser-integration check.
+
+### Phase 4 Step 8 verification
+
+Phase 4 Step 8 adds `MessageList`, `MessageBubble`, `ChatComposer`, and
+`useConversationScroll`, then composes them into the existing `ChatPage`
+without changing any Zustand, API-client, SSE-parser, backend, dependency, or
+lockfile interface. The transcript identifies customer and assistant content,
+renders multiline and HTML-like text through ordinary React text nodes, wraps
+long unbroken content, explains that earlier visible messages are not sent to
+the stateless backend, and requires an accessible inline confirmation before
+clearing. The existing store remains responsible for abort-before-clear.
+
+The composer exposes a labelled textarea, visible normalized 2,000-character
+count, associated inline errors, Enter submission, Shift+Enter newlines, and
+explicit IME-composition suppression. It is disabled while readiness is
+checking/unavailable and while one request is active, reusing the existing
+one-operation store invariant. It does not add risk metadata, response-mode
+presentation, request-error controls, cancellation controls, retry controls,
+or a controller hook; those remain later roadmap steps.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/MessageList.test.tsx src/features/chat/__tests__/ChatPage.test.tsx` | The first run exposed three test-only assertion/matcher failures while 14 tests passed; the production files linted. After using the installed axe runner's violation array and a whitespace-normalized inert-text assertion, the final focused run passed 4 files and all 18 tests. |
+| `npm.cmd exec -- tsc -p tsconfig.app.json --noEmit` | `COMPLETE_AND_VERIFIED` — the final TypeScript application check exited 0. |
+| `npm.cmd run lint` | `COMPLETE_AND_VERIFIED` — the final ESLint run exited 0 without warnings. |
+| `npm.cmd run test` | `COMPLETE_AND_VERIFIED` — the complete frontend suite passed 11 files and all 220 tests. |
+| `npm.cmd run test:coverage -- src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/MessageList.test.tsx src/features/chat/__tests__/ChatPage.test.tsx` | `COMPLETE_AND_VERIFIED` — 4 files and 18 tests passed; the Step 8 component directory reported 97.4% statements, 96.61% branches, 100% functions, and 97.14% lines; the scroll hook reported 100% statements and lines. |
+| `npm.cmd run build` | `COMPLETE_AND_VERIFIED` — TypeScript project build and Vite 8.2.0 production build passed with 34 modules transformed. |
+| `npm.cmd run dev -- --host 127.0.0.1` | `COMPLETE_AND_VERIFIED` for startup only — Vite 8.2.0 reported ready in 619 ms at `http://127.0.0.1:5173/`; the temporary process was stopped, the endpoint became unreachable, and all three temporary tracking files were removed. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed and 4 integration tests were deselected in 23.02s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+
+The localhost app was not visually verified: after successful Vite startup,
+the in-app browser runtime reported an empty browser list. No screenshot,
+visual breakpoint, manual keyboard run, Playwright test, mocked browser test,
+or live frontend-backend integration is claimed. Step 8 requires no FastAPI,
+classifier inference, Chroma, or Ollama service; the browser-visible startup
+state is expected to be unavailable when only the frontend is running. Phase
+4 Step 9 streaming integration is the next incomplete roadmap step and was
+not started.
+
+Verification-process correction recorded after Step 8: Steps 7 and 8 started
+Vite without also starting FastAPI, so they verified frontend startup and the
+expected unavailable state, not the real two-process localhost application.
+For future browser-visible implementation steps, start FastAPI with
+`.\venv\Scripts\python.exe scripts\run_api.py` from `backend/` and Vite with
+`npm.cmd run dev -- --host 127.0.0.1` from `frontend/` in separate terminals
+whenever the backend prerequisites are safely available. Browser-tool
+availability must be reported separately from service availability. Before
+handoff, stop every exact agent-owned API/Vite process, close every terminal
+window or session and browser tab or session opened by the agent, confirm
+ports 8000 and 5173 are no longer reachable, and remove temporary process
+files. Never stop a pre-existing user-owned process, terminal, or browser
+session.
+
 ## Presently implemented files
+
+Phase 4 Step 1 frontend scaffold:
+
+- `frontend/.gitignore`
+- `frontend/eslint.config.js`
+- `frontend/README.md`
+- `frontend/index.html`
+- `frontend/package.json`
+- `frontend/package-lock.json`
+- `frontend/public/favicon.svg`
+- `frontend/public/icons.svg`
+- `frontend/src/App.css`
+- `frontend/src/App.tsx`
+- `frontend/src/assets/hero.png`
+- `frontend/src/assets/react.svg`
+- `frontend/src/assets/vite.svg`
+- `frontend/src/index.css`
+- `frontend/src/main.tsx`
+- `frontend/tsconfig.app.json`
+- `frontend/tsconfig.json`
+- `frontend/tsconfig.node.json`
+- `frontend/vite.config.ts`
+
+Phase 4 Step 2 frontend configuration:
+
+- `frontend/.env.example`
+- `frontend/src/api/config.ts`
+- `frontend/src/api/__tests__/config.test.ts`
+- `frontend/vite.config.ts`
+
+Phase 4 Step 3 frontend contracts:
+
+- `frontend/src/api/contracts.ts`
+- `frontend/src/api/contractGuards.ts`
+- `frontend/src/api/__tests__/contractFixtures.ts`
+- `frontend/src/api/__tests__/contractGuards.test.ts`
+
+Phase 4 Step 4 frontend API client:
+
+- `frontend/src/api/errors.ts`
+- `frontend/src/api/client.ts`
+- `frontend/src/api/__tests__/client.test.ts`
+
+Phase 4 Step 5 streaming parser and client integration:
+
+- `frontend/src/api/sseParser.ts`
+- `frontend/src/api/__tests__/sseParser.test.ts`
+- `frontend/src/api/client.ts`
+- `frontend/src/api/__tests__/client.test.ts`
+
+Phase 4 Step 6 state management:
+
+- `frontend/src/features/chat/chatTypes.ts`
+- `frontend/src/features/chat/chatStateMachine.ts`
+- `frontend/src/features/chat/chatStore.ts`
+- `frontend/src/features/chat/__tests__/chatStateMachine.test.ts`
+- `frontend/src/features/chat/__tests__/chatStore.test.ts`
+
+Phase 4 Step 7 base UI:
+
+- `frontend/src/App.tsx`
+- `frontend/src/AppErrorBoundary.tsx`
+- `frontend/src/main.tsx`
+- `frontend/src/index.css`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/components/ServiceStatus.tsx`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+- `frontend/src/__tests__/AppErrorBoundary.test.tsx`
+- `frontend/src/test/setup.ts`
+- `frontend/vite.config.ts`
+- `frontend/.gitignore`
+- `frontend/eslint.config.js`
+
+Phase 4 Step 8 message and composer components:
+
+- `frontend/src/features/chat/components/MessageList.tsx`
+- `frontend/src/features/chat/components/MessageBubble.tsx`
+- `frontend/src/features/chat/components/ChatComposer.tsx`
+- `frontend/src/features/chat/hooks/useConversationScroll.ts`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/__tests__/MessageList.test.tsx`
+- `frontend/src/features/chat/__tests__/MessageBubble.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatComposer.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
 
 Core modules:
 
@@ -355,6 +943,7 @@ Phase 3 focused tests and tracking:
 - `backend/tests/test_api_chat.py`
 - `backend/tests/test_api_streaming.py`
 - `backend/tests/test_api_openapi.py`
+- `backend/tests/test_api_integration.py`
 - `docs/plans/phase-3-backend-api.md`
 
 Policies:
@@ -367,6 +956,7 @@ Policies:
 Scripts:
 
 - `backend/scripts/check_ollama.py`
+- `backend/scripts/run_api.py`
 - `backend/scripts/calibrate_retrieval.py`
 - `backend/scripts/inspect_vector_store.py`
 - `backend/scripts/test_retrieval.py`
@@ -410,6 +1000,56 @@ Tests:
 
 ## Important public interfaces
 
+- `frontend/src/api/config.ts: ApiConfig`
+- `frontend/src/api/config.ts: ApiConfigurationError`
+- `frontend/src/api/config.ts: loadApiConfig(...) -> ApiConfig`
+- `frontend/src/api/contracts.ts: ChatRequest, ChatResponse, ErrorDetail,
+  ErrorResponse, LivenessResponse, ReadinessComponents, ReadinessResponse,
+  StreamMetadataEvent, StreamChunkEvent, StreamDoneEvent, StreamErrorEvent`
+- `frontend/src/api/contracts.ts: PublicStatus, ResponseMode, RiskLevel,
+  ReadinessStatus, ComponentStatus, SseEventName, PublicAnswerMetadata,
+  SseEventPayloads`
+- `frontend/src/api/contracts.ts: MAX_CHAT_MESSAGE_CHARACTERS` and exact public
+  enum value tuples
+- `frontend/src/api/contractGuards.ts: isChatRequest(...),
+  isPublicAnswerMetadata(...), isChatResponse(...), isErrorDetail(...),
+  isErrorResponse(...), isLivenessResponse(...),
+  isReadinessComponents(...), isReadinessResponse(...),
+  isSseEventName(...), isStreamMetadataEvent(...), isStreamChunkEvent(...),
+  isStreamDoneEvent(...), isStreamErrorEvent(...)`
+- `frontend/src/api/errors.ts: ApiClientErrorKind, ApiClientErrorOptions,
+  ApiClientError, API_CLIENT_ERROR_KIND_VALUES`
+- `frontend/src/api/sseParser.ts: StreamEventHandlers, CompletedStream,
+  ParseSseStreamOptions, parseSseStream(...) -> Promise<CompletedStream>`
+- `frontend/src/api/client.ts: ApiRequestOptions, ApiClient,
+  CreateApiClientOptions, API_CLIENT_TIMEOUT_MILLISECONDS,
+  createApiClient(...) -> ApiClient`
+- `frontend/src/api/client.ts: ApiClient.streamChatMessage(message, handlers,
+  options?) -> Promise<CompletedStream>`
+- `frontend/src/features/chat/chatTypes.ts: RequestPhase, Availability,
+  MessageDelivery, ChatMessage, ChatInputError, ChatRequestError,
+  ChatConversationState` and exact UI state value tuples
+- `frontend/src/features/chat/chatStateMachine.ts:
+  canTransitionRequestPhase(...), isActiveRequestPhase(...),
+  isTerminalRequestPhase(...)`
+- `frontend/src/features/chat/chatStore.ts: ChatStoreActions, ChatStore,
+  CreateChatStoreOptions, createChatStore(...) -> StoreApi<ChatStore>`
+- `frontend/src/App.tsx: AppProps` and the default `App` component; tests may
+  inject an existing `StoreApi<ChatStore>` while production creates one from
+  the validated API configuration
+- `frontend/src/AppErrorBoundary.tsx: AppErrorBoundary`
+- `frontend/src/features/chat/components/ChatPage.tsx: ChatPageProps,
+  ChatPage`
+- `frontend/src/features/chat/components/ServiceStatus.tsx:
+  ServiceStatusProps, ServiceStatus`
+- `frontend/src/features/chat/components/MessageBubble.tsx:
+  MessageBubbleProps, MessageBubble`
+- `frontend/src/features/chat/components/MessageList.tsx: MessageListProps,
+  MessageList`
+- `frontend/src/features/chat/components/ChatComposer.tsx:
+  ChatComposerProps, ChatComposer`
+- `frontend/src/features/chat/hooks/useConversationScroll.ts:
+  useConversationScroll(...)`
 - `POST /api/v1/chat` (`ChatRequest` -> `ChatResponse`, with controlled
   `ErrorResponse` statuses 413, 415, 422, 500, 503, and 504)
 - `POST /api/v1/chat/stream` (`ChatRequest` -> validated buffered
@@ -752,6 +1392,21 @@ Working directory: `backend/`
   deterministic router/pipeline branches that do not resolve retrieval or
   generation; it did not contact Ollama, open Chroma, run protected classifier
   inference, or mutate persistent state.
+- Phase 3 Step 12 is service-free. Event-coordinated fakes exercise executor
+  ownership, queue/execution timeout, cancellation, shutdown, disconnect, and
+  buffered delivery without contacting Ollama, opening Chroma, running
+  protected-classifier inference, or mutating persistent state.
+- Phase 3 Step 13 used the already-running approved loopback Ollama service,
+  protected classifier inference, query-only access to the active Chroma
+  collection, and the real application lifespan. It exercised JSON and
+  buffered SSE without starting services, rebuilding/swapping the store,
+  changing the manifest, pulling models, or saving the classifier.
+- Phase 3 Step 14 repeated every approved read-only live check, the complete
+  integration suite, and real one-worker JSON/SSE smoke tests. The first two
+  strict pipeline runs safely contained a nondeterministic
+  `unsupported_guarantee`; the third unchanged run passed all seven probes.
+  The smoke-test API was stopped afterward. No service, model, store, manifest,
+  policy, or environment state was deliberately changed.
 - Step 35 exercised the complete approved local stack. After confirming no
   Python/Uvicorn backend or Chroma client process and no stale staging/backup
   directory, the protected rebuild activated and reopened a 67-record store.
@@ -789,6 +1444,12 @@ Working directory: `backend/`
   configuration deprecation warning even though precomputed embeddings are
   supplied; this does not affect the verified result but should be reviewed
   when dependencies are upgraded.
+- During Step 13, Chroma 1.5.9 rewrote bytes in its HNSW
+  `data_level0.bin` during query-only client use even though no add, update,
+  upsert, delete, rebuild, activation, or manifest-write operation was called.
+  The manifest hash and logical 67-record collection remained unchanged and
+  passed post-run inspection. Filesystem-enforced read-only access should be
+  investigated when Chroma is upgraded.
 - Windows directory moves must be treated as staged and rollback-capable, not
   universally atomic.
 - The Nomic document and query prefixes must be applied exactly once.
@@ -816,6 +1477,14 @@ Working directory: `backend/`
 - Live model output and performance timings are machine- and runtime-dependent.
   Performance values are descriptive prototype measurements, not production
   service-level guarantees.
+- The local API is unauthenticated and has no authorization, account or
+  transaction integration, conversation persistence, production case
+  management, audit controls, privacy controls, regulatory review, or
+  transaction execution.
+- Timed-out or disconnected blocking jobs may finish in the background. The
+  API retains their bounded capacity slot until actual worker completion.
+- The API and every Chroma client must be stopped before any future staged
+  vector-store rebuild or swap.
 - Step 26 and Phase 3 Step 9 perform validated buffered delivery rather than
   live model-token streaming. The API's explicit disconnect polling owns the
   post-body ASGI receive channel to avoid competing with Starlette's legacy
@@ -847,12 +1516,80 @@ Working directory: `backend/`
 
 ## Next incomplete step
 
-Phase 3 Step 12 — complete timeout, cancellation, and disconnect behavior.
+Phase 4 Step 9 — Streaming integration.
 
 ## Compact continuation handoff
 
-- Completed boundary: Phase 2 Steps 0–35 and Phase 3 Steps 1–11 are
-  `COMPLETE_AND_VERIFIED`.
+- Completed boundary: Phase 2 Steps 0–35, Phase 3 Steps 1–14, and Phase 4
+  Steps 1–8 are `COMPLETE_AND_VERIFIED`.
+- Phase 4 Step 1 created only the current Vite React TypeScript scaffold and
+  dependency/tooling baseline. It added no frontend product behavior.
+- The Vite 8 scaffold now uses the roadmap-required ESLint flat configuration;
+  the generated Oxlint dependency and `.oxlintrc.json` were removed.
+- Phase 4 Step 2 adds a strict immutable API-origin loader, one reviewed public
+  environment example, four fixed endpoint URLs, 25 focused configuration
+  tests, and the Tailwind v4 Vite plugin without a proxy.
+- Phase 4 Step 3 adds exact readonly public API contracts, enum tuples, and
+  handwritten exact-shape type predicates for chat, errors, health,
+  readiness, SSE event names, and all four SSE payloads. It adds 56 focused
+  tests and no dependency, parser, state, hook, component, or backend change.
+- Phase 4 Step 4 adds the immutable injected-fetch API client, four fixed
+  endpoint methods, exact request construction, 100-second timeout and caller
+  cancellation, strict status/media-type/request-ID/payload validation,
+  degraded HTTP 503 readiness handling, validated SSE transport preflight, and
+  safe typed error normalization. It adds 45 focused tests and no dependency,
+  SSE parser, state, hook, component, style, or backend change.
+- Phase 4 Step 5 adds strict byte-level SSE framing and protocol validation,
+  then changes `streamChatMessage(...)` to invoke validated metadata/chunk
+  handlers and resolve only after matching `done` plus clean EOF. Timeout and
+  cancellation remain active through body reading. It adds 37 parser tests,
+  expands the client suite to 47 tests, and adds no dependency, state, hook,
+  component, style, browser fixture, or backend change.
+- Phase 4 Step 6 adds readonly UI-only chat contracts, the explicit request
+  transition table, and an injected-client vanilla Zustand store. It owns
+  readiness availability, one active operation, memory-only turns, metadata,
+  chunks, completion, safe failure, cancellation, retry, and clear behavior;
+  local operation IDs never reach the API and stale or terminal callbacks are
+  inert. It adds 36 focused tests and no dependency, hook, component, style,
+  browser fixture, API contract, parser, or backend change.
+- `package.json` exposes `lint`, `test`, exact
+  `test:coverage = vitest run --coverage`, `build`, mocked `test:e2e`, and
+  `RUN_LIVE_API_TESTS`-gated `test:e2e:live` scripts.
+- The approved direct packages are locked, Chromium is installed locally,
+  frontend configuration tests/lint/build pass, and all 785
+  service-free backend tests plus compilation/baseline/policy/dependency
+  checks pass.
+- Phase 4 Step 7 adds the single-page application shell, guarded startup
+  readiness check, public service-status details, explicit connection retry,
+  safe error boundary, prototype/account-action/secret-entry notices,
+  keyboard skip link, reduced-motion and 320-pixel base styling, and focused
+  component tests. It changes no API, parser, store, backend, dependency, or
+  lockfile interface.
+- Step 7 focused and complete frontend tests, TypeScript checking, clean source
+  lint, focused coverage, production build, and Vite startup pass. The browser
+  runtime exposed no browser backend, so no visual or Playwright result was
+  claimed; no FastAPI, classifier, Chroma, or Ollama service was required.
+- Phase 4 Step 8 adds the safe ordered transcript, inert text message bubbles,
+  explicit stateless-request notice, confirmed memory clear, transcript scroll
+  hook, and labelled composer with normalized character counting, inline
+  validation, Enter/Shift+Enter/IME behavior, and duplicate-submit disabling.
+  It adds no dependency and changes no store, client, parser, or backend
+  interface.
+- Step 8 passed 18 focused component/axe tests, all 220 frontend tests,
+  TypeScript checking, clean lint, focused coverage, production build, Vite
+  startup, and the complete 785-test backend service-free boundary. No browser
+  backend was available, so visual and manual keyboard inspection remain
+  unclaimed.
+- Verification-process correction for future visible frontend steps: run the
+  backend and Vite concurrently in separate terminals when prerequisites are
+  available; do not conflate an unavailable browser-automation backend with an
+  unavailable FastAPI service. Stop every agent-owned server process, close
+  agent-opened terminal and browser sessions, and confirm ports 8000 and 5173
+  are free before handing the repository back for user verification.
+- The authoritative Phase 4 roadmap remains an untracked user file and must be
+  preserved; no commit was created.
+- Next boundary: implement only Phase 4 Step 9 streaming integration; do not
+  begin Phase 4 Step 10 risk and escalation UI.
 - Step 1 added `ApiSettings`, `load_api_settings(...)`,
   `validate_api_settings(...)`, module-level `api_settings`, exact
   `fastapi==0.140.13`/`starlette==1.3.1` pins, reviewed API environment
@@ -970,6 +1707,38 @@ Phase 3 Step 12 — complete timeout, cancellation, and disconnect behavior.
 - Codex's verification did not exercise a live service, classifier inference,
   active Chroma access, generation, embedding, running API process, or
   integration test; the live evidence above came from the user-supplied runs.
-- Continue with Phase 3 Step 12 only; preserve the protected model, active
-  store, Phase 2 safety boundary, ignored local environment, and untracked
-  user-supplied Phase 3 roadmap.
+- Step 12 completed the service/transport failure-lifetime matrix without
+  changing production or public interfaces. Tests now explicitly prove no
+  classifier/pipeline submission on queue timeout, capacity retention through
+  execution timeout and caller cancellation, release after actual worker
+  completion, running-plus-queued shutdown behavior, controlled pre-header
+  timeout JSON, disconnect-without-terminal SSE delivery, safe post-header
+  interruption, cancellation passthrough, and concurrent buffered delivery
+  after bounded compute.
+- Final Step 12 verification: 21 focused tests, 238 complete API tests, and 780
+  non-integration tests passed. Compilation, dependency integrity, four
+  policies, and five protected model artifacts also passed.
+- Step 13 added `backend/scripts/run_api.py`,
+  `backend/tests/test_api_integration.py`, and the active-store-aware
+  integration marker. The runner validates settings and starts
+  `app.main:app` with reload disabled and one worker.
+- The real API integration lifespan passed readiness, supported JSON,
+  deterministic stolen-card SSE, and unsupported JSON through the protected
+  classifier and complete active local stack. It proved real prompt,
+  structured-generation, and output-validator use only for the supported
+  route; accepted the approved post-validation fallback; verified exact safe
+  public framing; and preserved the manifest.
+- Final Step 13 verification: 1 runner test, 1 live API integration test, 239
+  complete service-free API tests, and 781 full non-integration tests passed.
+  Live Ollama prerequisites, pre/post 67-record store inspection, compilation,
+  dependency integrity, four policies, and five protected model artifacts also
+  passed.
+- Step 14 froze the Phase 4-facing contract in `README.md`, ran the complete
+  release sequence, verified the real one-worker JSON and buffered-SSE API,
+  and stopped the smoke-test process. The service-free suite passed 781 tests,
+  the integration suite passed 4 tests, and the final strict live pipeline run
+  passed all 7 probes after two safely contained nondeterministic generations.
+- Phase 3 is complete and Phase 4 Steps 1–8 are complete and verified. Phase 4
+  Step 9 streaming integration is next; preserve the protected
+  model, active store, Phase 2 safety boundary, ignored local environment, and
+  untracked user-supplied Phase 4 roadmap.

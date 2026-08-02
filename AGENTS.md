@@ -103,6 +103,35 @@ Before finishing:
 Never describe a test as passing unless it was actually run in the current
 work.
 
+## Local application verification and cleanup
+
+For every roadmap step that creates or changes visible frontend behavior,
+perform a live localhost check with the real application whenever its local
+prerequisites are safely available and the changed behavior can meaningfully
+be exercised.
+
+- Start FastAPI and Vite as separate processes in separate terminals. From
+  `backend/`, run `.\venv\Scripts\python.exe scripts\run_api.py`. From
+  `frontend/`, run `npm.cmd run dev -- --host 127.0.0.1`.
+- Do not treat a frontend-only Vite run that displays an unavailable-service
+  state as complete live application verification when the backend could
+  safely have been started.
+- Distinguish service availability from browser-automation availability. If
+  the browser tool is unavailable, still start and probe both services when
+  appropriate, then report visual and interactive browser checks separately
+  as not run.
+- Record the process IDs of every API or Vite process started by the coding
+  agent. Before handoff, stop those exact processes, close every terminal
+  window or terminal session and every browser tab or browser session opened
+  by the agent, confirm both localhost endpoints are no longer reachable, and
+  remove temporary PID or log files.
+- Never stop a pre-existing user-owned process or close a pre-existing
+  user-owned browser session. If one is reused for a read-only check, leave it
+  running and identify it as not agent-owned in the handoff.
+
+The final handoff must leave no agent-owned server, terminal, or browser
+session that could conflict with the user's independent verification.
+
 ## Repository checks
 
 Run from `backend/` with the virtual environment active:
