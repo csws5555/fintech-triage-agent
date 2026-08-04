@@ -31,6 +31,7 @@ function ComposerHarness({
       isSubmitting={isSubmitting}
       onDraftChange={setDraft}
       onSubmit={onSubmit}
+      onCancel={vi.fn()}
     />
   )
 }
@@ -96,13 +97,42 @@ describe('ChatComposer', () => {
     const onSubmit = vi.fn()
     render(<ComposerHarness isSubmitting onSubmit={onSubmit} />)
 
-    expect(screen.getByRole('textbox', { name: 'Message' })).toBeDisabled()
+    const textarea = screen.getByRole('textbox', { name: 'Message' })
+    expect(textarea).not.toBeDisabled()
+    expect(textarea).toHaveAttribute('readonly')
+    expect(textarea).toHaveAttribute('aria-disabled', 'true')
+    textarea.focus()
+    expect(textarea).toHaveFocus()
     const submit = screen.getByRole('button', {
       name: 'Request in progress',
     })
     expect(submit).toBeDisabled()
     await user.click(submit)
     expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('offers explicit cancellation while a request is active', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    render(
+      <ChatComposer
+        draft=""
+        inputError={null}
+        disabled={false}
+        isSubmitting
+        onDraftChange={vi.fn()}
+        onSubmit={vi.fn()}
+        onCancel={onCancel}
+      />,
+    )
+
+    expect(
+      screen.getByText(/local processing may continue in the background/i),
+    ).toBeVisible()
+    await user.click(
+      screen.getByRole('button', { name: 'Cancel request' }),
+    )
+    expect(onCancel).toHaveBeenCalledTimes(1)
   })
 
   it('has no detectable axe violations', async () => {

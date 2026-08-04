@@ -10,10 +10,14 @@ Status vocabulary:
 
 ## Current phase
 
-Phase 4 — Frontend Development — in progress.
+Phase 4 — Frontend Development — complete and verified.
 
 Phase 2 remains complete and verified through Step 35. Phase 3 Steps 1–14 and
-Phase 4 Steps 1–8 are `COMPLETE_AND_VERIFIED`.
+Phase 4 Steps 1–20 are `COMPLETE_AND_VERIFIED`. The 2026-08-04 closure audit
+completed the outstanding Step 13 keyboard/contrast and Step 14 mobile/desktop
+visual reviews against the real two-process application. It found and fixed
+one duplicate response-metadata landmark exposed only by a multi-response axe
+run, then passed the full affected release matrix and cleanup boundary.
 
 Roadmap sources:
 
@@ -93,6 +97,18 @@ Roadmap sources:
 | 6 — State management | `COMPLETE_AND_VERIFIED` | Readonly UI-only chat contracts, the explicit request transition table, and an injected-client vanilla Zustand store own availability, one active operation, in-memory turns, streaming metadata/chunks, cancellation, failure, retry, and clear semantics. Frontend-only operation IDs are never passed to the API; stale, out-of-order, mismatched, and terminal callbacks cannot mutate state; retries reuse a turn without duplicating the user message; clear aborts before removing memory. Thirty-six focused tests, about 94% focused statement coverage, the complete 201-test frontend suite, TypeScript checking, lint, and production build pass. |
 | 7 — Base UI | `COMPLETE_AND_VERIFIED` | The single-page React shell now constructs the production injected-client store, performs one guarded startup readiness check, and presents checking, ready, optional-only degraded, and unavailable states through text, icons, safe public component details, and explicit connection retry. The error boundary, local fictional-prototype identity, account-action limitations, secret-entry warning, skip link, reduced-motion rule, responsive Tailwind v4 styling, and memory-only notice pass 6 focused component tests, focused coverage, the complete 207-test frontend suite, TypeScript checking, clean source lint, and production build. |
 | 8 — Message and composer components | `COMPLETE_AND_VERIFIED` | The chat page now renders an ordered memory-only transcript, inert customer/assistant text, stateless-request guidance, an accessible confirmed Clear conversation action, automatic transcript scrolling, and a labelled composer with a normalized 2,000-character counter, inline validation, Enter submission, Shift+Enter newlines, IME protection, and active-request duplicate prevention. Eighteen focused component/axe tests, the complete 220-test frontend suite, TypeScript checking, clean source lint, production build, Vite startup, and the complete 785-test backend service-free boundary pass. |
+| 9 — Streaming integration | `COMPLETE_AND_VERIFIED` | `useChatController` now owns the page/store subscription boundary and guarded startup check, while the visible transcript distinguishes the pre-header processing wait, approved buffered delivery, validated completion, interruption, cancellation, and unavailable response states without announcing individual chunks. Existing operation-ID, request-ID, sequence, terminal, and partial-output invariants remain store/parser-owned. Seventy-eight focused parser/store/component tests, all 228 frontend tests, focused coverage, lint, production build, the complete 785-test backend service-free boundary, read-only live prerequisites, and concurrent FastAPI/Vite localhost probes pass. |
+| 10 — Risk and escalation UI | `COMPLETE_AND_VERIFIED` | Assistant responses now present all reviewed public status, risk, response-mode, request-reference, and `requires_human` metadata through accessible text/icon treatments, expandable safe details, and a prominent assistance banner that explicitly disclaims completed account actions and human handoffs. Forty-four focused component/axe tests, all 255 frontend tests, focused coverage, lint, production build, the complete 785-test backend boundary, healthy read-only prerequisites, and real critical/high-risk CORS/SSE metadata probes pass. |
+| 11 — Readiness and errors | `COMPLETE_AND_VERIFIED` | Availability and request failures now have separate safe state, readiness failures fall back to one guarded liveness probe, relevant network/classifier/pipeline request failures recheck health without repeating chat, and every documented HTTP/browser/stream failure has an accessible focused notice with safe code/reference details. One hundred sixteen focused tests, all 279 frontend tests, focused coverage, lint, production build, all 785 backend service-free tests, protected baseline/policy/dependency checks, and concurrent fully-ready FastAPI/Vite plus live 413/422 CORS/error probes pass. |
+| 12 — Cancellation and retry | `COMPLETE_AND_VERIFIED` | Active processing and delivery now expose explicit cancellation with an honest retained-worker limitation; cancelled turns and retryable failures expose manual same-turn retry without duplicating the customer message; nonretryable failures restore the saved text for editing without automatic resubmission. Seventy-eight focused store/component tests, all 288 frontend tests, focused coverage, lint, production build, all 785 backend service-free tests, protected baseline/policy/dependency checks, read-only local prerequisites, and concurrent fully-ready FastAPI/Vite plus real CORS/SSE probes pass. |
+| 13 — Accessibility | `COMPLETE_AND_VERIFIED` | Stable polite delivery/status regions avoid per-chunk announcements; critical guidance and failures remain assertive; the active composer preserves focus as a read-only control; validation, cancellation, retry, edit, reconnect, and clear-confirmation focus recovery are deterministic; labels, textual risk meaning, contrast, visible focus, and reduced-motion behavior are covered. The closure audit completed a real Chromium keyboard-only skip/submit/details/clear/cancel/retry flow and direct high/critical visual review. A multi-response axe run exposed one moderate duplicate-landmark violation; replacing each nested labelled metadata `section` with a non-landmark `div` fixed it. The regression test, focused 35-test suite, final 311-test suite, zero-violation real multi-response axe checks, lint, build, mocked/live Chromium, and backend boundaries pass. |
+| 14 — Responsive styling | `COMPLETE_AND_VERIFIED` | The forced document minimum width is removed; root/page/error fallbacks use dynamic viewport minimum heights and zeroable widths; mobile controls stack full-width before returning to intrinsic desktop widths; long messages, metadata, alerts, service rows, and banners wrap safely; the transcript uses a dynamic mobile height cap and the desktop remains bounded. Direct 320×720 and 1440×900 screenshot inspection confirmed readable high/critical content, visible controls/focus, safe wrapping, and no clipping; measured document widths were exactly 320/320 and 1440/1440 client/scroll pixels. The focused responsive tests, final 311-test suite, production build, 13 mocked and 8 live Chromium tests pass. |
+| 15 — Service-free tests | `COMPLETE_AND_VERIFIED` | Exact public readiness, error, metadata, chunk, and completion fixtures drive the production `App → fetch client → SSE parser → Zustand → UI` composition without live services. Seven reviewed response branches, optional degradation, unreachable health checks, HTTP 413, interrupted SSE, cancellation, exact request construction, request-ID consistency, inert HTML-like input, internal-field exclusion, and memory-only storage pass 12 focused tests. All 310 frontend tests, 96.22% statement/94.08% branch coverage, lint, TypeScript/Vite build, all 785 service-free backend tests, compilation, protected-baseline verification, policy validation, and dependency integrity pass. No Playwright file, live service, browser session, production interface, dependency, or later roadmap step changed. |
+| 16 — Production build | `COMPLETE_AND_VERIFIED` | The complete 310-test frontend suite, lint, `tsc -b`, and Vite 8.2.0 production build pass. The ignored bundle contains only five expected HTML/CSS/JavaScript/SVG assets, no source maps, no file over 512 KiB, no remote asset reference, and no absolute user path, protected model/store name, backend path/environment key, or source-map marker. The 234,439-byte JavaScript bundle is 72.13 kB gzip. A separate configured-origin build embedded `https://api.example.test` exactly once, the final bundle was rebuilt with the documented default origin, and a production preview served the index and all three referenced assets with HTTP 200 before its exact process was stopped and port 4173 was confirmed closed. No source, configuration, dependency, lockfile, public interface, backend, Playwright file, or Step 17 work changed. |
+| 17 — Mocked app integration tests | `COMPLETE_AND_VERIFIED` | Playwright starts an isolated strict-port Vite server and intercepts only the exact Phase 3 loopback API paths with CORS-safe readiness, error, and complete buffered-SSE responses. Thirteen Chromium tests cover all seven approved answer branches, ready/degraded/unavailable states, exact one-field credential-free requests, retry without duplicate turns, cancellation and stale-response suppression, inert adversarial text, memory-only reloads, keyboard focus, zero detectable axe violations, and 320px/1440px overflow boundaries. The complete 310-test Vitest suite, 96.23% statement/94.09% branch coverage, lint, production build, 785 service-free backend tests, protected baseline, policies, and dependency integrity pass. Route fulfillment verifies workflow and complete-event parsing, not true incremental network chunk timing; no Step 18 live spec was added. |
+| 18 — Live backend integration | `COMPLETE_AND_VERIFIED` | The explicitly `RUN_LIVE_API_TESTS=1`-gated Chromium suite uses the separately started real frontend and fully-ready FastAPI stack. Eight tests verify approved CORS, exposed server request IDs, exact one-field credential-free streaming requests, `text/event-stream`/buffering headers, validated completion for supported, stolen-card, unsupported, clarification, prompt-refusal, and action-limitation branches, pre-header cancellation, and a genuine closed-loopback unavailable state. The final live suite passed 8 tests; all 13 mocked browser tests, 310 Vitest tests, lint, production build, 785 service-free backend tests, protected baseline, policies, and dependency integrity also pass. The active manifest and protected-model hashes were unchanged, all agent-owned services were stopped, and ports 8000, 5173, and 5174 were confirmed unreachable. |
+| 19 — Final full verification | `COMPLETE_AND_VERIFIED` | The final release audit passed frontend lint, 310 Vitest tests, 96.23% statement/94.09% branch coverage, the TypeScript/Vite build, 13 mocked Chromium tests, backend compilation, 785 service-free tests, the protected-model and policy verifiers, frontend/backend dependency checks, all 8 Ollama checks, the 67-record active-store inspection, 4 separately reported live backend tests, and 8 real FastAPI/Vite Chromium tests. The production bundle contains five ignored local assets, no source maps, missing references, remote index assets, private backend configuration, protected paths, or model names. Protected classifier and active-manifest hashes remained unchanged; all agent-owned processes/logs were removed and ports 8000/5173 were confirmed closed. Chroma 1.5.9 again rewrote three internal runtime files during read-only client use, as recorded under known compatibility risks, without changing their sizes, the manifest, or logical store integrity. |
+| 20 — Documentation and Phase 5 handoff | `COMPLETE_AND_VERIFIED` | The root runbook now documents the local architecture and safety boundary, frontend/backend prerequisites and configuration, exact two-terminal startup and cleanup order, normal/mocked/live verification tiers, a stable six-scenario demo, accessibility and privacy checks, honest limitations, final Step 19 evidence, and the conditional Phase 5 handoff. Documentation command/path/link checks and the final repository audit pass. No product source, backend, dependency, protected asset, runtime store, or Phase 5 work changed. |
 
 No roadmap step is currently `PARTIAL` or `BLOCKED`.
 
@@ -816,6 +832,603 @@ ports 8000 and 5173 are no longer reachable, and remove temporary process
 files. Never stop a pre-existing user-owned process, terminal, or browser
 session.
 
+### Phase 4 Step 9 verification
+
+Phase 4 Step 9 adds `useChatController` as the single React subscription and
+startup-check boundary between `ChatPage` and the existing injected Zustand
+store. `ChatPage` now consumes that hook without duplicating store selectors.
+The existing store already connected `submitMessage()` to
+`streamChatMessage(...)`, forwarded metadata/chunk callbacks with the current
+frontend-only operation ID, completed only from the parser's validated
+`CompletedStream`, preserved approved partial text on failure, and rejected
+stale callbacks. Those source-authoritative interfaces were reused unchanged.
+
+`MessageBubble` now renders explicit textual delivery state for the long
+pre-header processing wait, approved buffered delivery, validated completion,
+interruption, cancellation, and response failure. Empty pending assistant
+bubbles no longer render an empty content paragraph. Only the stable delivery
+state is a polite live region, so individual chunk appends are not announced.
+Customer and assistant content remains ordinary inert React text. This step
+does not add Step 10 risk/status/response-mode/human-assistance presentation,
+Step 11 request-error controls, or Step 12 Cancel/Retry/Edit-and-resend UI.
+
+No dependency, lockfile, API client, SSE parser, Zustand state/action, backend,
+policy, protected model, or Chroma content changed.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/api/__tests__/sseParser.test.ts src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/MessageList.test.tsx` | Pre-edit baseline: 5 files and 70 tests passed. Final focused run: 5 files and all 78 tests passed. |
+| `npm.cmd run test` | `COMPLETE_AND_VERIFIED` — the complete frontend suite passed 11 files and all 228 tests. |
+| `npm.cmd run lint` | `COMPLETE_AND_VERIFIED` — ESLint exited 0 without warnings. |
+| `npm.cmd run build` | `COMPLETE_AND_VERIFIED` — the TypeScript project build and Vite 8.2.0 production build passed with 35 modules transformed. |
+| `npm.cmd run test:coverage -- src/api/__tests__/sseParser.test.ts src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx` | `COMPLETE_AND_VERIFIED` — 4 files and all 74 focused tests passed. `useChatController` reported 96.66% statements/83.33% branches/100% functions/95.65% lines; the parser reported 94.16% statements and the store 93.75%. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` — exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | `COMPLETE_AND_VERIFIED` — 785 passed and 4 integration tests were deselected in 22.95s; one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | `COMPLETE_AND_VERIFIED` — all 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | `COMPLETE_AND_VERIFIED` — all 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | `COMPLETE_AND_VERIFIED` — no broken requirements. |
+| `.\venv\Scripts\python.exe scripts\check_ollama.py` | `COMPLETE_AND_VERIFIED` — all 8 existing local-service checks passed without starting or changing Ollama. |
+| `.\venv\Scripts\python.exe scripts\inspect_vector_store.py` | `COMPLETE_AND_VERIFIED` — the existing active cosine store passed with 67 records, four approved policies, no duplicates, unsafe records, manifest mismatches, or integrity failures. |
+| `.\venv\Scripts\python.exe scripts\run_api.py` plus `GET /health/live` and `GET /health/ready` | `COMPLETE_AND_VERIFIED` for live startup/health — the agent-owned API served HTTP 200 liveness and fully-ready HTTP 200 readiness. A redundant second startup attempt correctly failed with Windows port-in-use while the first process owned port 8000. |
+| `npm.cmd run dev -- --host 127.0.0.1` plus `GET http://127.0.0.1:5173/` | `COMPLETE_AND_VERIFIED` for live startup/app-shell delivery — Vite served HTTP 200 with the React root while FastAPI was concurrently ready. |
+
+The in-app browser control skill was initialized, but the runtime returned an
+empty browser list even after its required troubleshooting check. Therefore no
+page, screenshot, visual state, keyboard interaction, DevTools inspection, or
+Playwright test is claimed. No Playwright configuration or E2E spec exists yet;
+those remain Step 17. Service availability is verified separately: FastAPI and
+Vite were concurrently reachable, every agent-owned process/session was
+stopped, both localhost endpoints were confirmed unreachable, and temporary
+API log files were removed before handoff.
+
+### Phase 4 Step 10 verification
+
+Phase 4 Step 10 adds `ResponseMetadata` and `HumanAssistanceBanner` without
+changing the validated API, SSE parser, Zustand store, controller, or backend.
+`MessageBubble` renders metadata only for assistant responses after the
+existing store accepts a validated metadata event. Every public status, risk
+level, and response mode has reviewed customer-facing text. Risk changes visual
+and accessibility emphasis only; response mode remains descriptive and never
+controls routing. Critical priority and required-human guidance use concise
+assertive announcements without duplicating the live region when both apply.
+
+Expandable response details expose only the server request reference and the
+descriptive response type. Visible assistance and page-level wording say that
+no account action or human handoff occurred. Customer and assistant text
+remains inert React text, and no internal classifier, routing, retrieval,
+policy, prompt, validator, or model metadata is requested, stored, or shown.
+
+No dependency, lockfile, API-client contract, parser, Zustand state/action,
+hook, backend, policy, protected model, or Chroma content changed.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/MessageList.test.tsx` | Pre-edit baseline passed 3 files and all 21 tests. |
+| `npm.cmd run test -- src/features/chat/__tests__/ResponseMetadata.test.tsx src/features/chat/__tests__/HumanAssistanceBanner.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/ChatPage.test.tsx` | The first implementation run exposed nine test/markup issues while 34 tests passed; details visibility, duplicate status queries, and the axe-invalid alert element were corrected. The next run passed 43 tests; the final run after consolidating critical/human announcements passed 4 files and all 44 tests. |
+| `npm.cmd run test` | Initial complete run passed 13 files and 254 tests. Final run passed 13 files and all 255 tests. |
+| `npm.cmd run test:coverage -- src/features/chat/__tests__/ResponseMetadata.test.tsx src/features/chat/__tests__/HumanAssistanceBanner.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/ChatPage.test.tsx` | Final focused coverage run passed 4 files and all 44 tests; chat components reported 87.69% statements, 96% branches, 73.68% functions, and 87.69% lines. |
+| `npm.cmd run lint` | Final ESLint run exited 0 without warnings. |
+| `npm.cmd run build` | Final TypeScript/Vite production build passed with 37 modules transformed. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | 785 passed, 4 integration tests deselected, and one known Starlette TestClient deprecation warning in 24.20 seconds. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+| `.\venv\Scripts\python.exe scripts\check_ollama.py` | All 8 read-only local-service checks passed; no service or model was started or changed. |
+| `.\venv\Scripts\python.exe scripts\inspect_vector_store.py` | The active cosine store passed with 67 records, four approved policies, and no duplicate, unsafe, manifest, or integrity failures. |
+| `.\venv\Scripts\python.exe scripts\run_api.py`, `npm.cmd run dev -- --host 127.0.0.1`, `GET /health/live`, `GET /health/ready`, and `GET http://127.0.0.1:5173/` | The concurrently running agent-owned services returned HTTP 200 liveness, fully-ready HTTP 200 readiness, and the Vite application shell. The initial sandboxed hidden API launch failed before binding because its base interpreter was inaccessible; the approved repository runner then started successfully. |
+| Two `POST http://127.0.0.1:8000/api/v1/chat/stream` requests with `Origin: http://127.0.0.1:5173`, `Accept: text/event-stream`, `Content-Type: application/json`, and only `message` in the JSON body | Real CORS/SSE passed. Account-takeover wording returned matching header/event request IDs, `safety_guidance`, `deterministic_safety`, `critical`, `requires_human=true`, ordered metadata/chunks/done, and the exact allowed origin. Stolen-card wording returned the same invariants with `high` and `requires_human=false`. |
+
+The browser-control runtime exposed no browser after its required
+troubleshooting check, so no page, screenshot, visual state, keyboard action,
+DevTools inspection, or Playwright result is claimed. Phase 4 has no
+Playwright configuration/spec yet; mocked E2E remains Step 17. Both services
+were stopped by exact agent-owned PID, ports 8000 and 5173 were confirmed
+closed, and all temporary live-check logs were removed.
+
+### Phase 4 Step 11 verification
+
+Phase 4 Step 11 separates the availability probe error from the current chat
+request error in the existing Zustand store. Startup and manual connection
+checks still call readiness first; when readiness cannot be obtained, one
+guarded liveness call distinguishes an unreachable API from a live API whose
+readiness cannot be confirmed. Public readiness components remain the only
+submission authority: optional-only vector-store/Ollama degradation keeps chat
+enabled, while unavailable configuration, classifier, or pipeline state blocks
+submission.
+
+Network/stream interruption and classifier/support-service failures now cause
+one guarded health recheck after the failed turn is recorded. Busy, timeout,
+validation, protocol, and other failures do not trigger unnecessary probes.
+No failure automatically repeats a chat request. `RequestErrorNotice` presents
+the validated public message, stable code, optional server request reference,
+and deterministic recovery guidance; it receives focus after failure and is
+associated with the composer. Availability notices continue using the polite
+service status surface, while request failures use an assertive alert. Raw
+exceptions and response bodies never enter either UI state.
+
+No API contract, API-client implementation, SSE parser, dependency, lockfile,
+backend, policy, protected model, or Chroma content changed. Step 12
+cancellation and same-turn retry controls were not added.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/api/__tests__/client.test.ts src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx` | Pre-edit baseline passed 5 files and all 92 tests. |
+| `npm.cmd run test -- src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx` | First implementation run failed 2 of 33 tests because the prior tests still asserted the now-separated availability error field and readiness-only connection wording; both expectations and liveness fixtures were corrected. |
+| `npm.cmd run test -- src/api/__tests__/client.test.ts src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx` | The first six-file run failed 5 of 116 tests because non-retryable code-specific guidance intentionally did not use the generic phrase asserted by the test; the focused expectations were corrected. The final run passed all 6 files and 116 tests. |
+| `npm.cmd run test` | Passed all 14 files and 279 frontend tests. |
+| `npm.cmd run test:coverage -- src/api/__tests__/client.test.ts src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/ChatPage.test.tsx` | Passed 4 files and all 99 focused tests; the focused set reported 87.48% statements, 82.41% branches, 90.44% functions, and 87.55% lines. |
+| `npm.cmd run lint` | ESLint exited 0 without warnings. |
+| `npm.cmd run build` | TypeScript and the Vite 8.2.0 production build passed with 38 modules transformed. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+| `.\venv\Scripts\python.exe scripts\run_api.py`, `npm.cmd run dev -- --host 127.0.0.1`, `GET /health/live`, `GET /health/ready`, and `GET http://127.0.0.1:5173/` | Concurrent localhost verification passed: liveness, fully-ready readiness, and the Vite application shell returned HTTP 200 at `http://127.0.0.1:5173/`; both health responses carried server request IDs and exact `http://127.0.0.1:5173` CORS approval. |
+| Invalid and oversized `POST /api/v1/chat/stream` requests with exact frontend origin, JSON content type, and SSE accept header | Live pre-header error verification passed: blank input returned the safe HTTP 422 `invalid_request` JSON envelope and oversized input returned the safe HTTP 413 `payload_too_large` envelope, each with a server request ID and exact CORS approval. |
+
+The browser skill initialized but its required discovery and troubleshooting
+check returned no available browser. No visual page inspection, screenshot,
+manual keyboard interaction, DevTools inspection, or Playwright result is
+claimed. No Playwright configuration/spec exists yet; mocked E2E remains Step
+17. FastAPI and Vite were stopped by exact agent-owned process IDs/sessions,
+ports 8000 and 5173 were confirmed unreachable, and every Step 11 temporary
+log file was removed.
+
+### Phase 4 Step 12 verification
+
+Phase 4 Step 12 exposes the existing AbortController-backed cancellation path
+through a visible `Cancel request` control during both the pre-header
+processing wait and approved response delivery. Cancelling immediately marks
+the matching assistant response cancelled, retains any approved partial text,
+and makes the operation terminal; late metadata, chunks, completion, and
+failure callbacks remain inert. Visible copy accurately states that stopping
+browser delivery cannot guarantee the already-running local backend worker
+stopped.
+
+Cancelled turns and retryable failures expose explicit customer-activated
+retry controls. The store now permits retry only for those two cases, creates
+a fresh frontend-only operation ID and AbortController, resets the same
+assistant response, and reuses the same turn and customer bubble. Nonretryable
+failures expose `Edit and resend`; the store restores the original normalized
+request into the composer, clears the terminal error/retry context, and waits
+for the customer to edit and submit a new turn. No request is automatically
+repeated.
+
+No dependency, lockfile, API contract/client implementation, SSE parser,
+backend, policy, protected model, Chroma content, persistence, or browser-test
+scaffold changed.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test -- src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx` | Pre-edit baseline passed 5 files and all 69 tests. Final focused run passed the same 5 files and all 78 tests. |
+| `npm.cmd run test` | Passed all 14 files and 288 frontend tests. |
+| `npm.cmd run test:coverage -- src/features/chat/__tests__/chatStore.test.ts src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx` | Passed 5 files and all 78 focused tests; `src/features/chat` reported 92.89% statements, 89.4% branches, 97.72% functions, and 92.85% lines, while `chatStore.ts` reported 93.33% statements. |
+| `npm.cmd run lint` | ESLint exited 0 without warnings. |
+| `npm.cmd run build` | TypeScript and the Vite 8.2.0 production build passed with 38 modules transformed. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+| `.\venv\Scripts\python.exe scripts\check_ollama.py` | All 8 read-only local-service checks passed without starting or changing Ollama or its models. |
+| `.\venv\Scripts\python.exe scripts\inspect_vector_store.py` | The existing active cosine store passed with 67 records, four approved policies, and no duplicate, unsafe, manifest, or integrity failures. |
+| `.\venv\Scripts\python.exe scripts\run_api.py`, `npm.cmd run dev -- --host 127.0.0.1`, `GET /health/live`, `GET /health/ready`, and `GET http://127.0.0.1:5173/` | Concurrent localhost verification passed: liveness, fully-ready readiness, and the Vite React root returned HTTP 200; readiness carried a server request ID and exact `http://127.0.0.1:5173` CORS approval. |
+| `POST /api/v1/chat/stream` with only `{"message":"My card was stolen in London."}`, exact frontend origin, JSON content type, and SSE accept header | Real deterministic CORS/SSE verification passed with HTTP 200 `text/event-stream`, matching header/event request IDs, ordered metadata/seven chunks/done, `safety_guidance`, `deterministic_safety`, `high`, and `requires_human=false`. |
+
+The in-app browser runtime initialized, but browser selection failed and its
+required troubleshooting discovery returned an empty browser list. Therefore
+no page, screenshot, visual state, keyboard interaction, DevTools inspection,
+or Playwright result is claimed. Phase 4 still has no Playwright configuration
+or spec; adding it remains Step 17 and was not scaffolded here. Store and RTL
+tests provide deterministic mocked cancellation/retry/edit workflow coverage,
+but do not claim real browser transport timing. Agent-owned FastAPI PID 20536
+and Vite PID 20240 were stopped, both localhost endpoints were confirmed
+unreachable, and all four temporary Step 12 log files were removed.
+
+### Phase 4 Step 13 verification
+
+Phase 4 Step 13 keeps the composer in the tab order during an active request
+by making it read-only instead of disabling it. Enter-submitted requests
+therefore retain composer focus while the duplicate-submission guard and
+disabled submit button remain unchanged. Validation failures return focus to
+the associated composer; cancellation, retry, edit-and-resend, successful
+connection recovery, and confirmed conversation clearing also recover focus
+to the composer. A failed connection retry returns focus to its retry control.
+The inline clear alertdialog focuses its destructive action when opened and
+returns focus to the trigger when dismissed.
+
+Existing delivery-state status regions remain stable and polite, streamed
+answer content stays outside those regions, request failures and critical
+human-assistance guidance remain assertive, and critical risk without a human
+banner retains one textual alert. Risk and status labels continue to have
+visible text and symbols. Reduced-motion preference changes automatic
+transcript scrolling from smooth to immediate. Muted composer,
+response-detail, placeholder, and footer text use the higher-contrast slate
+palette while the global visible-focus and reduced-motion rules remain
+unchanged.
+
+One accessibility-focused application test file covers the ready-page axe
+scan, the keyboard-only submit workflow, successful focus preservation, and
+destructive-clear focus recovery. Component/page tests additionally cover
+read-only focus during processing, validation/cancel/retry/edit/reconnect
+focus, clear-dialog focus restoration, non-announcement of individual stream
+chunks, and reduced-motion scrolling. No dependency, lockfile, API/client,
+SSE parser, Zustand state/action, backend, policy, protected model, Chroma
+content, persistence, Playwright configuration, or Step 14 responsive-styling
+work changed.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd test -- --run src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageList.test.tsx src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/HumanAssistanceBanner.test.tsx src/features/chat/__tests__/ResponseMetadata.test.tsx` | Pre-edit accessibility baseline passed 7 files and 76 tests. |
+| `npm.cmd test -- --run src/features/chat/__tests__/ChatAccessibility.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageList.test.tsx src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx` | The first implementation run had one jsdom native-summary tab-order expectation failure while 37 tests passed. After restricting the stable cross-environment assertion to skip-link/composer/send controls, the final focused run passed 5 files and 38 tests; the later added clear-focus test also passed in the complete suite. |
+| `npm.cmd run build` | TypeScript project compilation and the Vite 8.2.0 production build passed with 38 modules transformed. |
+| `npm.cmd run lint` | ESLint exited 0 without warnings. |
+| `npm.cmd test` | The first run after adding the persistent-connection-failure focus case had 293 passes and one failed assertion because it compared the pre-retry DOM button with the remounted retry control. After querying the current control, the final run passed all 15 files and 294 frontend tests. |
+| `npm.cmd run test:coverage` | Passed all 15 files and 294 tests; total coverage was 95.85% statements, 93.65% branches, 98.27% functions, and 95.9% lines. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+| `.\venv\Scripts\python.exe scripts\check_ollama.py` | All 8 approved read-only local Ollama/model checks passed. |
+| `.\venv\Scripts\python.exe scripts\inspect_vector_store.py` | The active cosine store passed with 67 records, four approved policies, and no duplicate, unsafe, manifest, or integrity failures. |
+| `.\venv\Scripts\python.exe -m pytest -q -m integration` | Passed all 4 existing live integration tests with 785 tests deselected and four known dependency deprecation warnings. |
+| `GET http://127.0.0.1:5173/`, `GET http://127.0.0.1:8000/health/live`, `GET http://127.0.0.1:8000/health/ready`, and `GET http://127.0.0.1:5173/src/features/chat/components/ChatComposer.tsx` | Read-only probes against pre-existing user-owned services passed: frontend HTTP 200, liveness `alive`, readiness HTTP 200, and the served Vite module contained the Step 13 read-only and `aria-disabled` composer behavior. |
+| `git diff --check` | Exited 0; Git reported only existing line-ending warnings. |
+
+The browser-control skill initialized, but browser selection failed and the
+required one-time troubleshooting discovery returned an empty browser list.
+No page, screenshot, visual contrast check, real-browser tab order, manual
+keyboard workflow, DevTools inspection, or Playwright result is claimed.
+Phase 4 still has no Playwright configuration/spec; creating it remains Step
+17 and was not scaffolded. Existing Vite PID 13140 and API PID 17304 predated
+this step, were used only for read-only probes, and were deliberately left
+running. This step created no process, terminal session, browser session, log,
+PID file, temporary store, or other cleanup target.
+
+### Phase 4 Step 14 verification
+
+Phase 4 Step 14 removes the Vite scaffold's forced `320px` minimum from the
+document instead of masking overflow with horizontal clipping. The document
+and React root now allow intrinsic shrinking and use `100dvh` minimum height;
+the page and fatal-error fallback use Tailwind's dynamic viewport unit so
+mobile browser chrome and virtual keyboards do not depend on a fixed viewport
+height.
+
+The main/header/footer grids and every nested response panel explicitly allow
+zero-width flex/grid shrinking. Long message text keeps `overflow-wrap:
+anywhere`, public request references keep `break-all`, metadata badges and
+human/error guidance stay bounded, and service-detail rows may wrap label and
+status independently. The transcript is limited to `55dvh` on mobile and the
+existing `34rem` desktop cap from the `sm` breakpoint. Clear, confirm, retry,
+cancel, submit, edit, reconnect, and fatal reload controls use the available
+mobile width and return to intrinsic width at `sm`.
+
+`ChatResponsive.test.tsx` supplies deliberately long unbroken URL/request-ID,
+multiline Unicode, critical human-assistance, degraded service-detail, error,
+active composer, and transcript fixtures. It asserts the zeroable document
+contract, long-content wrapping/bounds, mobile transcript cap, and mobile-to-
+desktop control widths. No component prop, state/store, hook, API/client, SSE,
+backend, dependency, lockfile, remote font/image, persistence, or Step 15
+service-free matrix behavior changed.
+
+The roadmap assigns `playwright.config.ts` and
+`tests/e2e/chat.mocked.spec.ts` to Step 17. Those files were not created or
+scaffolded in Step 14. Browser-control selection was attempted before and
+after localhost startup, but no browser was available, so the requested real
+Playwright 320px/common-desktop overflow assertions and manual resize could
+not run.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd test -- --run src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageList.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/ResponseMetadata.test.tsx src/features/chat/__tests__/HumanAssistanceBanner.test.tsx src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/ChatAccessibility.test.tsx src/__tests__/AppErrorBoundary.test.tsx` | Pre-edit responsive baseline passed 9 files and 83 tests. |
+| `npm.cmd test -- --run src/features/chat/__tests__/ChatResponsive.test.tsx src/features/chat/__tests__/ChatPage.test.tsx src/features/chat/__tests__/ChatComposer.test.tsx src/features/chat/__tests__/MessageList.test.tsx src/features/chat/__tests__/MessageBubble.test.tsx src/features/chat/__tests__/ResponseMetadata.test.tsx src/features/chat/__tests__/HumanAssistanceBanner.test.tsx src/features/chat/__tests__/RequestErrorNotice.test.tsx src/features/chat/__tests__/ChatAccessibility.test.tsx src/__tests__/AppErrorBoundary.test.tsx` | Initial run had 85 passes and 2 responsive-fixture failures: jsdom's transformed `import.meta.url` was not a file URL and an exact lookup targeted one line inside multiline text. Production behavior was unaffected. After using the frontend-relative stylesheet path and the complete multiline element, the focused responsive file passed all 4 tests. |
+| `npm.cmd run build` | Both initial and final TypeScript/Vite production builds passed with 38 modules transformed. |
+| `npm.cmd run lint` | Both initial and final ESLint runs exited 0. |
+| `npm.cmd test` | Passed all 16 files and 298 frontend tests. |
+| `npm.cmd run test:coverage` | Passed all 16 files and 298 tests; coverage remained 95.85% statements, 93.65% branches, 98.27% functions, and 95.9% lines. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+| First localhost probe | Failed because the two pre-existing user-owned Step 13 services had already stopped independently; no process was stopped by Step 14 before this probe. |
+| Agent-owned `Start-Process` FastAPI/Vite startup | The first sandboxed FastAPI launcher could not resolve the base interpreter due access denial; the approved rerun started API PID 25240. Vite started as PID 27804 and reported `http://127.0.0.1:5173/`. |
+| `GET http://127.0.0.1:5173/`, `GET http://127.0.0.1:8000/health/live`, `GET http://127.0.0.1:8000/health/ready`, `GET http://127.0.0.1:5173/src/index.css`, and `GET http://127.0.0.1:5173/src/features/chat/components/MessageList.tsx` | Concurrent localhost verification passed: frontend HTTP 200, liveness `alive`, readiness HTTP 200, served CSS omitted the forced 320px minimum and contained `100dvh`, and the served transcript module contained the `55dvh` mobile cap. |
+| Exact process and temporary-log cleanup | Vite PID 27804 and FastAPI PID 25240 were stopped; both endpoints were confirmed unreachable; the four `.step14-*.tmp` logs were removed. |
+
+No Playwright command, screenshot, visible page inspection, viewport resize,
+real scroll-width assertion, browser keyboard check, or DevTools inspection is
+claimed. The browser runtime returned `No browser is available` on both
+selection attempts. No integration-marked backend test was run because Step
+14 changes only CSS/component classes and the required real application
+startup/readiness boundary passed without changing Ollama or Chroma.
+
+### Phase 4 Step 15 verification
+
+Phase 4 Step 15 adds exact service-free public fixtures and one production-
+composition integration suite. It mocks only `fetch`, then exercises the real
+API client, strict SSE parser, Zustand store, controller, and rendered app for
+normal supported guidance, deterministic stolen-card safety, critical human
+assistance, clarification, unsupported fallback, internal-information
+refusal, and unverified-action limitation responses. The same suite covers
+optional-only degraded readiness, unreachable readiness/liveness, pre-header
+HTTP 413, EOF without `done`, explicit cancellation, exact one-field request
+JSON, omitted credentials/request IDs, inert HTML-like text, internal-field
+exclusion, and empty browser storage.
+
+The first focused implementation run exposed a jsdom cross-realm typed-array
+artifact in real `Response` stream bodies. Test-only SSE responses retain the
+exact public headers/status/body contract while supplying the controlled
+`ReadableStream<Uint8Array>` directly; no production parser guard was weakened.
+The first TypeScript build then caught and corrected an overly narrow inferred
+readiness-fixture parameter. No production source, public interface, package,
+lockfile, backend, policy, protected model, Chroma store, environment file, or
+Playwright configuration changed.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test:coverage` | Pre-edit baseline passed 16 files and 298 tests with 95.85% statement and 93.65% branch coverage. Final run passed 17 files and 310 tests with 96.22% statement, 94.08% branch, 98.89% function, and 96.29% line coverage. |
+| `npm.cmd run test -- src/__tests__/AppServiceFree.test.tsx` | Initial run failed 10 of 12 tests because jsdom `Response` rewrapped SSE bytes across realms; after keeping controlled bytes in the fetch fixture, the final focused run passed all 12 tests. |
+| `npm.cmd run test -- src/__tests__/AppServiceFree.test.tsx -t "normal supported guidance"` and temporary `-t "diagnoses"` checks | The normal scenario initially reproduced the invalid-stream failure; the diagnostic isolated the cross-realm `Uint8Array` mismatch; the final normal scenario passed. The temporary diagnostic test was removed. |
+| `npm.cmd run lint` | ESLint exited 0. |
+| `npm.cmd run build` | The first TypeScript run failed on the narrow readiness-fixture parameter; after annotating it with the public `ReadinessResponse` interface, TypeScript and the Vite 8.2.0 production build passed with 38 modules transformed. |
+| `npm.cmd run test` | Final complete run passed all 17 files and 310 tests. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+
+No FastAPI, Vite, Ollama, Chroma, classifier inference, integration-marked
+test, Playwright command, browser session, screenshot, or visual check was run.
+Step 15 changes only service-free tests, so there was no new visible behavior
+requiring localhost verification. Mocked browser E2E remains Step 17 and was
+not scaffolded.
+
+### Phase 4 Step 16 verification
+
+Phase 4 Step 16 verifies the existing deployable static frontend without
+changing application source or build configuration. The production entry
+continues to use only the strict public API-origin loader, browser API client,
+React, React DOM, and Zustand. Only `.env.example` is present under the
+frontend environment-file boundary, `dist/` remains ignored, and the direct
+production dependency tree contains only `react`, `react-dom`, and `zustand`.
+
+The default build emits `index.html`, `favicon.svg`, `icons.svg`, one CSS
+asset, and one JavaScript asset. Every index reference resolves locally. The
+bundle contains the documented default API origin exactly once and contains
+no source map, remote asset reference, absolute user path, protected model or
+store name, backend path or private backend environment key. No emitted file
+exceeds 512 KiB. The only non-API URL literals are library standards/documentation
+strings; none is referenced by `index.html` as an asset.
+
+| Command | Result |
+| --- | --- |
+| `node --version`, `npm.cmd --version`, `npm.cmd ls --depth=0`, and `npm.cmd ls --omit=dev --depth=0` | Passed. Node is `v22.13.0`, npm is `10.9.2`, the installed direct tree is valid, and production dependencies are exactly React 19.2.8, React DOM 19.2.8, and Zustand 5.0.14. |
+| `npm.cmd run lint` | Passed; ESLint exited 0 without warnings. |
+| `npm.cmd run test` | Passed all 17 files and 310 tests. |
+| `npm.cmd run build` | Passed `tsc -b` and Vite 8.2.0 with 38 modules transformed; the final default bundle is 0.45 kB HTML, 34.48 kB CSS (6.62 kB gzip), and 234.43 kB JavaScript (72.13 kB gzip), plus two local SVG assets. |
+| PowerShell `dist/` allowlist, indexed-asset, size, source-map, URL, and sensitive-content audit | The first case-insensitive draft falsely matched the public lowercase readiness keys `ollama_chat_model` and `ollama_embedding_model`; the corrected case-sensitive audit passed. Five expected files were present, all three index references resolved locally, no source maps or files over 512 KiB existed, and the leakage denylist had no match. |
+| `$env:VITE_API_BASE_URL = 'https://api.example.test'; npm.cmd run build` plus configured-origin inspection | Passed; the custom origin occurred exactly once in the emitted bundle. No environment file was created or changed. |
+| `Remove-Item Env:VITE_API_BASE_URL -ErrorAction SilentlyContinue; npm.cmd run build` plus final-origin/source-map inspection | Passed; the final bundle contains the documented default origin exactly once, the temporary custom origin zero times, and zero source maps. |
+| Vite production preview on `http://127.0.0.1:4173/` plus HTTP asset probes | Passed. The HTML, favicon, JavaScript, and CSS returned HTTP 200 with the expected media types. Agent-owned PID 32896 was stopped, the endpoint was confirmed unreachable, and both temporary preview logs were removed. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Passed from `backend/`; exited 0. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | Passed; all 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | Passed; all 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | Passed; no broken requirements. |
+
+No FastAPI, classifier inference, Chroma client, Ollama call, integration-
+marked test, Playwright command, browser session, screenshot, or visual check
+was run. Step 16 changes no visible behavior and needs no live backend service;
+the HTTP preview verifies static delivery only. Mocked browser workflows remain
+Phase 4 Step 17 and were not started.
+
+### Phase 4 Step 17 verification
+
+Phase 4 Step 17 adds the first standalone Playwright configuration and one
+mocked Chromium suite. Route interception handles the exact loopback Phase 3
+health and streaming paths, including POST preflight, exposed server request
+IDs, strict readiness/error JSON, and complete `metadata`, ordered `chunk`, and
+terminal `done` frames generated from the shared public fixtures. The suite
+drives the production `App → fetch client → SSE parser → Zustand → UI`
+composition without FastAPI, the classifier, Chroma, or Ollama.
+
+The seven answer workflows verify supported grounded guidance, stolen-card
+safety, critical human assistance, clarification, unsupported fallback,
+internal-information refusal, and unverified-action limitation presentation.
+Additional tests cover optional degradation, mandatory unavailability,
+retryable HTTP failure and same-turn retry, pending-request cancellation and
+stale fulfillment suppression, request shape and omitted credentials, inert
+script-like text, empty browser storage and refresh clearing, keyboard submit
+and focus, a real-browser axe scan, and horizontal layout boundaries at 320px
+and 1440px. Mocked route fulfillment proves complete workflow behavior, not
+true incremental network delivery, byte fragmentation, or live cancellation
+timing; those boundaries remain in Vitest or the later gated live suite.
+
+| Command | Result |
+| --- | --- |
+| `npx.cmd playwright --version` and local browser inspection | Playwright `1.62.1` and its matching Chromium/headless-shell runtime were present; no install or dependency change was needed. |
+| `npm.cmd run test:e2e` | Final standalone Chromium run passed all 13 tests in 38.1 seconds. The first complete run passed 12 tests and exposed one assertion-order issue: opening response details moved focus before the focus assertion. The assertion was moved to the completed-response boundary and the final run passed. |
+| Browser accessibility and responsive assertions inside `test:e2e` | Keyboard Enter submission preserved composer focus before later interaction; the rendered critical workflow produced zero axe violations; 320px and 1440px document scroll-width and control-bound checks passed. |
+| `npm.cmd run test` | Passed all 17 Vitest files and 310 tests after excluding `tests/e2e/**` from Vitest collection. |
+| `npm.cmd run test:coverage` | Passed 17 files and 310 tests with 96.23% statements, 94.09% branches, 98.9% functions, and 96.29% lines. |
+| `npm.cmd run lint` | ESLint exited 0 without warnings. |
+| `npm.cmd run build` | `tsc -b` and Vite 8.2.0 passed with 38 modules transformed; emitted sizes remained 0.45 kB HTML, 34.48 kB CSS, and 234.43 kB JavaScript. |
+| `.\venv\Scripts\python.exe -m compileall app scripts tests` | Exited 0 from `backend/`. The sandboxed launcher was denied before Python started; the approved rerun passed. |
+| `.\venv\Scripts\python.exe -m pytest -q -m "not integration"` | Passed all 785 service-free backend tests with 4 integration tests deselected and one known Starlette TestClient deprecation warning. |
+| `.\venv\Scripts\python.exe scripts\verify_phase1_baseline.py` | All 5 protected model artifacts matched. |
+| `.\venv\Scripts\python.exe scripts\validate_policies.py` | All 4 approved fictional policy files validated. |
+| `.\venv\Scripts\python.exe -m pip check` | No broken requirements. |
+| Post-test localhost and generated-output check | The test-owned Vite endpoint at `127.0.0.1:5173` was unreachable after the final run. Playwright artifacts are confined to ignored `node_modules/.cache`; no root `test-results` or `playwright-report` directory was created. |
+
+The in-app browser skill completed its required setup and troubleshooting, but
+its browser inventory was empty (`No browser is available`). Standalone
+Playwright Chromium therefore supplied the actual automated browser coverage;
+no manual visible-page or screenshot review is claimed. The one failed-run
+screenshot, video, and trace stayed inside ignored test cache output. No live
+backend integration test was run because Step 17 is explicitly service-free,
+and no Step 18 file or live-test behavior was started.
+
+### Phase 4 Step 18 verification
+
+Phase 4 Step 18 adds the separately gated
+`tests/e2e/chat.live.spec.ts`. The live configuration does not start or reuse
+an unverified server: `test:e2e:live` requires both documented localhost
+processes to be running, while the mocked suite continues to own its isolated
+strict-port Vite server. The live browser sends only `message`, omits cookies
+and authorization, checks the real approved origin and exposed request ID,
+requires the streaming media/buffering headers, and reaches completed UI state
+only through the production runtime guards, SSE parser, store, and components.
+
+The final eight Chromium cases cover ready state, supported card delivery,
+deterministic stolen-card safety, unsupported mortgage fallback, international-
+fee clarification, hidden-prompt refusal, unverified-action limitation,
+pre-header cancellation, and a genuine connection refusal on a closed
+loopback port. Generated wording is not fixed: the supported case accepts only
+the backend-approved grounded or safe-fallback public branches. The action-
+limitation input uses the frozen Phase 2/3 matrix phrase, `Has my card been
+frozen?`; a first run showed that the non-contract wording `Was my card already
+frozen?` correctly did not satisfy that test's action-status expectation, so
+the completed backend was not changed during this frontend integration step.
+
+| Command | Result |
+| --- | --- |
+| `npm.cmd run test:e2e:live` with `RUN_LIVE_API_TESTS=1` | Final run passed all 8 live Chromium tests in 19.6 seconds. An earlier complete run passed 7 and failed the action-limitation case because it used the non-contract wording described above; the fixture was corrected without a backend change. |
+| Targeted live deterministic browser check | `npx.cmd playwright test tests/e2e/chat.live.spec.ts --grep 'deterministic stolen-card'` passed 1 test in 3.0 seconds after test-harness troubleshooting. |
+| Live prerequisites and service probes | `scripts/check_ollama.py` passed installed-model, digest, embedding, generation, and local-only checks; `scripts/inspect_vector_store.py` passed for the compatible 67-record store; `/health/live` and fully-ready `/health/ready` returned HTTP 200. |
+| Final service-free frontend checks | `npm.cmd run lint` exited 0; `npm.cmd run test` passed 17 files and 310 tests; `npm.cmd run build` passed with 38 modules transformed; `npm.cmd run test:e2e` passed all 13 mocked Chromium tests. |
+| Final backend regression boundary | Compilation exited 0; 785 non-integration tests passed with 4 deselected and one known deprecation warning; 5 protected artifacts matched; 4 policies validated; dependency integrity passed. The first sandboxed combined launch was denied before Python started, and the approved rerun passed. |
+| Live cleanup and integrity | Agent-owned FastAPI PID 21696 and Vite PID 17316 were stopped; Playwright browser contexts closed; temporary service logs were removed; ports 8000, 5173, and 5174 were unreachable; the manifest and all protected artifact hashes matched their pre-run values. |
+
+No manual visible-page, DevTools-panel, or screenshot review is claimed.
+Standalone Playwright supplied the real interactive Chromium verification.
+
+### Phase 4 Step 19 verification
+
+Phase 4 Step 19 changes no product source, public interface, backend behavior,
+dependency manifest, lockfile, policy, model, or runtime configuration. It
+audits the complete Phase 4 frontend boundary, reruns the full documented
+release matrix, and records only the verified result in this status document.
+
+The dependency and repository audit confirmed Node 22.13.0 and npm 10.9.2,
+lockfile version 3, exact root manifest/lock agreement, three intended runtime
+dependencies, 23 intended development dependencies, and an installed tree
+with no missing/extraneous package. Only reviewed `.env.example` files are
+tracked; the local backend environment, frontend build/coverage/Playwright
+output, protected classifier, and active Chroma store are ignored. No backend
+or dependency-manifest path is present in the Phase 4 dirty tree.
+
+| Command or audit | Result |
+| --- | --- |
+| `npm.cmd ls --depth=0` | Passed with the expected React, React DOM, Zustand, Tailwind, Vitest/RTL/axe/coverage, ESLint/TypeScript, Vite, and Playwright packages; no missing or extraneous dependency was reported. |
+| `npm.cmd run lint` | Exited 0 with no ESLint finding. |
+| `npm.cmd run test` | Passed 17 files and 310 tests. |
+| `npm.cmd run test:coverage` | Passed the same 310 tests with 96.23% statements, 94.09% branches, 98.90% functions, and 96.29% lines. |
+| `npm.cmd run build` | Passed `tsc -b` and Vite 8.2.0 with 38 modules transformed; JavaScript remained 234,439 bytes and 72.13 kB gzip. |
+| `npm.cmd run test:e2e` | Passed all 13 service-free mocked Chromium tests. |
+| `python -m compileall app scripts tests` | Exited 0. |
+| `python -m pytest -q -m "not integration"` | Passed 785 tests with 4 live tests deselected and one known Starlette/TestClient deprecation warning. |
+| `python scripts/verify_phase1_baseline.py` | All 5 protected classifier artifacts matched. |
+| `python scripts/validate_policies.py` | All 4 approved policies passed. |
+| `python -m pip check` | Reported no broken requirements. |
+| `python scripts/check_ollama.py` | All 8 approved-loopback/model/digest/embedding/generation/cloud-tag checks passed. The first combined sandboxed prerequisite command was denied before either Python script ran; the approved individual rerun passed. |
+| `python scripts/inspect_vector_store.py` | Passed for the compatible 67-record cosine store, four approved sources, no duplicate/unsafe records, and no manifest or integrity failure. |
+| `python -m pytest -q -m integration` | Passed all 4 live tests with 785 deselected and 4 known deprecation warnings. |
+| FastAPI/Vite liveness and readiness | Agent-owned FastAPI and Vite returned HTTP 200; readiness reported all six components ready. A first polling harness loop returned exit 1 because its privileged TCP-owner query was caught with the HTTP probes, although those probes were already returning 200; the replacement `netstat` plus HTTP probe passed and recorded the exact service PIDs. |
+| Unapproved CORS preflight | Returned HTTP 400 with no `Access-Control-Allow-Origin`; the approved Vite origin passed in the real browser suite. |
+| `npm.cmd run test:e2e:live` with `RUN_LIVE_API_TESTS=1` | Passed all 8 real FastAPI/Vite Chromium tests in 40.1 seconds. |
+| Production artifact audit | Passed for 5 ignored files totaling 283,935 bytes; maximum file size 234,439 bytes; 0 source maps, 0 remote index references, 0 missing local references, exactly 1 default API-origin occurrence, and 0 private backend environment keys, protected paths, absolute user paths, or approved model-name occurrences. |
+| Live cleanup and integrity | FastAPI PIDs 26544/26988 and Vite PIDs 2472/2076/14508 were stopped; Chromium contexts closed; four temporary logs were removed; temporary/backup Chroma stores were absent; ports 8000 and 5173 were unreachable. All protected-model and active-manifest hashes matched their pre-live values. |
+| `git diff --check` | Exited 0; Git emitted only the existing LF-to-CRLF working-copy notices. |
+| `git diff` and `git status --short` | Inspected after the status update. The dirty tree contains the existing reviewed Phase 4 frontend/status work; Step 19 changed only this status document. No backend source, dependency manifest/lockfile, environment, policy, model, manifest, generated build output, temporary store, or roadmap file was added to the diff. |
+
+Chroma 1.5.9 read-only access again rewrote bytes in
+`data_level0.bin`, `length.bin`, and `chroma.sqlite3` while preserving their
+file sizes, the active manifest, and the verified logical collection. No add,
+update, upsert, delete, rebuild, swap, policy edit, or manifest write was
+performed. This is the already documented Chroma compatibility behavior, not
+a Step 19 store migration.
+
+No manual visible-page, DevTools-panel, screenshot, comprehensive keyboard/
+contrast review, or manual drag-resize review is claimed. Step 19 introduces
+no visible behavior, and its required mocked and live automated Chromium
+checks passed. The separate manual verification gaps for Steps 13 and 14
+remained accurately `IMPLEMENTED_NOT_VERIFIED` at that point; the later Phase
+4 closure audit below supersedes this point-in-time status.
+
+### Phase 4 Step 20 verification
+
+Phase 4 Step 20 changes only the root runbook and this status record. The
+runbook now covers the shipped local architecture and safety boundary,
+frontend/backend prerequisites, public environment configuration, exact
+two-terminal startup and cleanup order, normal unit/build checks, mocked and
+live browser gates, backend service-free/live checks, a stable six-scenario
+demo, manual accessibility/privacy/responsive checks, honest limitations, and
+the conditional Phase 5 handoff.
+
+The handoff preserves validated buffered delivery and the frozen Phase 3
+contract. It starts no service, touches no protected model or active store,
+and adds no frontend/backend source, dependency, lockfile, environment,
+recording, presentation, deployment, hosting, or other Phase 5 work.
+
+| Command or audit | Result |
+| --- | --- |
+| `npm.cmd run` from `frontend/` | Exited 0 and listed every documented script: `dev`, `build`, `lint`, `test`, `test:coverage`, `test:e2e`, `test:e2e:live`, and `preview`; the live script retains the explicit `RUN_LIVE_API_TESTS=1` gate. |
+| Root README heading/token audit with `rg` | Exited 0 and found the configuration, startup, demo, verification-tier, manual-check, Phase 5, action-limitation, and limitation text. |
+| PowerShell documented-path and Markdown-link audit | Exited 0; all 16 referenced configuration, runner, check, manifest, and Playwright files exist, and the one local README link resolves. |
+| Documentation/source consistency review | Passed against the shipped frontend config/contracts/components, `package.json`, Playwright configuration/live fixtures, backend settings/routes, and final Step 19 evidence. The stable action-limitation demo uses `Has my card been frozen?`; the earlier `Was my card already frozen?` wording is explicitly documented as a clarification route. |
+| Visible application verification | No meaningful browser verification was required for this documentation-only step. The completed Step 19 mocked/live Chromium suites were the current application evidence at that point; the later Phase 4 closure audit below completed the Step 13/14 reviews. |
+| `git diff --check` | Exited 0. Git emitted only the existing LF-to-CRLF working-copy notices. |
+| `git diff` | Exited 0 and was inspected. Step 20 adds only the root runbook and status changes; the remaining frontend/status diff is the preserved reviewed Phase 4 work from earlier steps. |
+| `git status --short` | Exited 0 and was inspected. No generated build/coverage/browser output, environment file, backend source, dependency/lockfile, policy, model, active-store, temporary-store, roadmap, or Phase 5 file was added by Step 20. |
+
+No Phase 5 execution began.
+
+### Phase 4 completion verification
+
+The 2026-08-04 closure audit targeted only the final Step 13 and Step 14
+verification gaps plus the complete application boundary. The in-app browser
+skill initialized, but discovery and its required troubleshooting flow found
+no available browser instance. The repository's installed Playwright Chromium
+runner therefore exercised the real application, while captured mobile and
+desktop screenshots were inspected directly. No in-app-browser interaction is
+claimed.
+
+The first expanded multi-response axe run found one moderate
+`landmark-unique` violation: every assistant response used an identically
+labelled nested metadata `section`. `ResponseMetadata` now uses a non-landmark
+`div` inside the already-labelled assistant article, and a two-response axe
+regression test prevents recurrence. No prop, public API, Zustand, hook,
+streaming, backend, dependency, or lockfile contract changed.
+
+| Command or audit | Result |
+| --- | --- |
+| `npm.cmd ls --depth=0` | Exited 0 with the expected frontend dependency tree and no missing/extraneous package. |
+| `npm.cmd run lint` | Exited 0 before and after the accessibility fix. |
+| `npm.cmd run test` | Final run passed 17 files and 311 tests. |
+| `npm.cmd run test:coverage` | Final run passed 311 tests with 96.23% statements, 94.09% branches, 98.90% functions, and 96.29% lines. |
+| `npm.cmd run build` | Passed `tsc -b` and Vite 8.2.0 with 38 transformed modules; final JavaScript was 234.40 kB and 72.12 kB gzip. |
+| Focused metadata/accessibility/message test run | Passed 3 files and 35 tests after the duplicate-landmark fix. |
+| `npm.cmd run test:e2e` | Final run passed all 13 mocked Chromium workflows. |
+| `npm.cmd run test:e2e:live` with `RUN_LIVE_API_TESTS=1` | Final post-fix run passed all 8 real FastAPI/Vite Chromium tests. |
+| Real keyboard/visual review harness | Final run passed keyboard-only skip, submit, details, clear confirmation, cancellation, and retry; zero axe violations across multiple low/high/critical/human-assistance responses; reduced motion; 320px and 1440px exact no-overflow measurements; empty local/session/IndexedDB storage; six exact one-field credential-free stream requests; and zero console/page errors. |
+| Direct screenshot inspection | 320×720 and 1440×900 captures showed readable normal/warning/high/critical content, visible focus, safe wrapping, usable controls, and no horizontal clipping. The fixed skip link was measured unfocused and fully off-screen (`top=-84`, `bottom=-44`); its appearance in stitched full-page captures was a screenshot artifact. |
+| Backend service-free boundary | Compilation passed; 785 tests passed with 4 integration tests deselected and one known Starlette/TestClient warning; 5 protected artifacts, 4 policies, and Python dependency integrity passed. |
+| Live backend boundary | All 8 Ollama checks, 67-record store inspection, 6 retrieval probes, 7 real classifier-to-answer probes, and 4 integration tests passed. |
+| Owned-process cleanup | FastAPI launcher/listener tree PIDs 1644/22016/22248 and Vite wrapper/listener tree PIDs 4560/19252 were stopped. Both endpoints were unreachable and all temporary review scripts, screenshots, and four logs were removed. |
+
+An initial immediate keyboard retry after browser cancellation timed out because
+the documented single backend worker was still finishing the cancelled
+grounded-generation job. Waiting for that retained bounded worker before retry
+made the real recovery flow pass. This confirms the existing honest
+cancellation limitation rather than a new defect.
+
+Phase 4 is complete and verified. No Phase 5 work began.
+
 ## Presently implemented files
 
 Phase 4 Step 1 frontend scaffold:
@@ -901,6 +1514,109 @@ Phase 4 Step 8 message and composer components:
 - `frontend/src/features/chat/__tests__/MessageBubble.test.tsx`
 - `frontend/src/features/chat/__tests__/ChatComposer.test.tsx`
 - `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+
+Phase 4 Step 9 streaming integration:
+
+- `frontend/src/features/chat/hooks/useChatController.ts`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/components/MessageBubble.tsx`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+- `frontend/src/features/chat/__tests__/MessageBubble.test.tsx`
+
+Phase 4 Step 10 risk and escalation UI:
+
+- `frontend/src/features/chat/components/ResponseMetadata.tsx`
+- `frontend/src/features/chat/components/HumanAssistanceBanner.tsx`
+- `frontend/src/features/chat/components/MessageBubble.tsx`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/__tests__/ResponseMetadata.test.tsx`
+- `frontend/src/features/chat/__tests__/HumanAssistanceBanner.test.tsx`
+- `frontend/src/features/chat/__tests__/MessageBubble.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+
+Phase 4 Step 11 readiness and errors:
+
+- `frontend/src/features/chat/components/RequestErrorNotice.tsx`
+- `frontend/src/features/chat/components/ChatComposer.tsx`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/hooks/useChatController.ts`
+- `frontend/src/features/chat/chatTypes.ts`
+- `frontend/src/features/chat/chatStore.ts`
+- `frontend/src/features/chat/__tests__/RequestErrorNotice.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+- `frontend/src/features/chat/__tests__/chatStore.test.ts`
+
+Phase 4 Step 12 cancellation and retry:
+
+- `frontend/src/features/chat/chatStore.ts`
+- `frontend/src/features/chat/hooks/useChatController.ts`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/components/ChatComposer.tsx`
+- `frontend/src/features/chat/components/MessageList.tsx`
+- `frontend/src/features/chat/components/MessageBubble.tsx`
+- `frontend/src/features/chat/components/RequestErrorNotice.tsx`
+- `frontend/src/features/chat/__tests__/chatStore.test.ts`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatComposer.test.tsx`
+- `frontend/src/features/chat/__tests__/MessageBubble.test.tsx`
+- `frontend/src/features/chat/__tests__/RequestErrorNotice.test.tsx`
+
+Phase 4 Step 13 accessibility:
+
+- `frontend/src/features/chat/__tests__/ChatAccessibility.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatComposer.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatPage.test.tsx`
+- `frontend/src/features/chat/__tests__/MessageBubble.test.tsx`
+- `frontend/src/features/chat/__tests__/MessageList.test.tsx`
+- `frontend/src/features/chat/components/ChatComposer.tsx`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/components/MessageList.tsx`
+- `frontend/src/features/chat/components/ResponseMetadata.tsx`
+- `frontend/src/features/chat/components/ServiceStatus.tsx`
+
+Phase 4 Step 14 responsive styling:
+
+- `frontend/src/index.css`
+- `frontend/src/AppErrorBoundary.tsx`
+- `frontend/src/__tests__/AppErrorBoundary.test.tsx`
+- `frontend/src/features/chat/__tests__/ChatResponsive.test.tsx`
+- `frontend/src/features/chat/components/ChatPage.tsx`
+- `frontend/src/features/chat/components/ServiceStatus.tsx`
+- `frontend/src/features/chat/components/MessageList.tsx`
+- `frontend/src/features/chat/components/MessageBubble.tsx`
+- `frontend/src/features/chat/components/ResponseMetadata.tsx`
+- `frontend/src/features/chat/components/HumanAssistanceBanner.tsx`
+- `frontend/src/features/chat/components/ChatComposer.tsx`
+- `frontend/src/features/chat/components/RequestErrorNotice.tsx`
+
+Phase 4 Step 15 service-free tests:
+
+- `frontend/src/test/fixtures.ts`
+- `frontend/src/__tests__/AppServiceFree.test.tsx`
+
+Phase 4 Step 17 mocked app integration tests:
+
+- `frontend/playwright.config.ts`
+- `frontend/tests/e2e/chat.mocked.spec.ts`
+- `frontend/src/test/fixtures.ts`
+- `frontend/vite.config.ts`
+
+Phase 4 Step 18 live backend integration:
+
+- `frontend/tests/e2e/chat.live.spec.ts`
+- `frontend/playwright.config.ts`
+
+Phase 4 Step 20 documentation and handoff:
+
+- `README.md`
+- `docs/IMPLEMENTATION_STATUS.md`
+
+Phase 4 completion correction and evidence:
+
+- `frontend/src/features/chat/components/ResponseMetadata.tsx`
+- `frontend/src/features/chat/__tests__/ResponseMetadata.test.tsx`
+- `README.md`
+- `docs/IMPLEMENTATION_STATUS.md`
 
 Core modules:
 
@@ -1032,7 +1748,8 @@ Tests:
 - `frontend/src/features/chat/chatStateMachine.ts:
   canTransitionRequestPhase(...), isActiveRequestPhase(...),
   isTerminalRequestPhase(...)`
-- `frontend/src/features/chat/chatStore.ts: ChatStoreActions, ChatStore,
+- `frontend/src/features/chat/chatStore.ts: ChatStoreActions (including
+  cancelRequest, retryRequest, and editAndResendRequest), ChatStore,
   CreateChatStoreOptions, createChatStore(...) -> StoreApi<ChatStore>`
 - `frontend/src/App.tsx: AppProps` and the default `App` component; tests may
   inject an existing `StoreApi<ChatStore>` while production creates one from
@@ -1041,15 +1758,26 @@ Tests:
 - `frontend/src/features/chat/components/ChatPage.tsx: ChatPageProps,
   ChatPage`
 - `frontend/src/features/chat/components/ServiceStatus.tsx:
-  ServiceStatusProps, ServiceStatus`
+  ServiceStatusProps, ServiceStatus`; `retryButtonRef` optionally supports
+  deterministic focus recovery after connection retry
 - `frontend/src/features/chat/components/MessageBubble.tsx:
   MessageBubbleProps, MessageBubble`
+- `frontend/src/features/chat/components/ResponseMetadata.tsx:
+  ResponseMetadataProps, ResponseMetadata`
+- `frontend/src/features/chat/components/HumanAssistanceBanner.tsx:
+  HumanAssistanceBannerProps, HumanAssistanceBanner`
+- `frontend/src/features/chat/components/RequestErrorNotice.tsx:
+  REQUEST_ERROR_NOTICE_ID, RequestErrorNoticeProps, RequestErrorNotice`
 - `frontend/src/features/chat/components/MessageList.tsx: MessageListProps,
   MessageList`
 - `frontend/src/features/chat/components/ChatComposer.tsx:
-  ChatComposerProps, ChatComposer`
+  ChatComposerProps, ChatComposer`; the component forwards its textarea ref
+  for page-level focus recovery and remains focusable/read-only during active
+  submission
 - `frontend/src/features/chat/hooks/useConversationScroll.ts:
   useConversationScroll(...)`
+- `frontend/src/features/chat/hooks/useChatController.ts: ChatController,
+  useChatController(store) -> ChatController`
 - `POST /api/v1/chat` (`ChatRequest` -> `ChatResponse`, with controlled
   `ErrorResponse` statuses 413, 415, 422, 500, 503, and 504)
 - `POST /api/v1/chat/stream` (`ChatRequest` -> validated buffered
@@ -1252,6 +1980,20 @@ Working directory: `backend/`
 
 | Command | Status | Exact result |
 | --- | --- | --- |
+| Phase 4 completion audit | `COMPLETE_AND_VERIFIED` | The duplicate metadata-landmark defect found by the real multi-response axe review was fixed and regression-tested. Final results: 311 frontend tests; unchanged 96.23% statement/94.09% branch coverage; lint/build pass; 13 mocked and 8 live Chromium tests; zero-violation keyboard/contrast checks; exact 320px/1440px no-overflow visual review; 785 service-free and 4 live backend tests; all Ollama/store/retrieval/pipeline/protected-asset/policy/dependency checks; and complete owned-process/temp-file cleanup. |
+| Phase 4 Step 20 documentation validation | `COMPLETE_AND_VERIFIED` | `npm.cmd run` listed every documented frontend script; the README heading/token audit exited 0; all 16 documented files exist; the one local README link resolves; the runbook was cross-checked against current frontend/backend source, live fixtures, and the final Step 19 evidence. No application test or live browser run was needed for this documentation-only change. |
+| Phase 4 Step 19 full frontend release matrix | `COMPLETE_AND_VERIFIED` | Lint exited 0; 17 Vitest files/310 tests passed; coverage was 96.23% statements/94.09% branches/98.90% functions/96.29% lines; the TypeScript/Vite build passed with 38 modules; all 13 mocked and 8 live Chromium tests passed. |
+| Phase 4 Step 19 backend and live boundary | `COMPLETE_AND_VERIFIED` | Compilation passed; 785 service-free tests passed with 4 deselected/1 warning; all 4 integration tests passed with 785 deselected/4 warnings; 8 Ollama checks and the 67-record active-store inspection passed; 5 classifier artifacts, 4 policies, Python dependencies, and the frontend install/lock boundary passed. |
+| Phase 4 Step 19 release/integrity audit | `COMPLETE_AND_VERIFIED` | The 5-file ignored production bundle passed size/reference/source-map/private-path checks; protected-model and active-manifest hashes matched; the known Chroma read-time runtime-file rewrite recurred without a manifest, size, or logical-integrity change; exact agent-owned services/logs were removed and ports 8000/5173 were closed. |
+| Phase 4 Step 18 live Chromium suite | `COMPLETE_AND_VERIFIED` | The final gated run passed 8 tests against the real fully-ready FastAPI and Vite processes, covering approved CORS, request IDs and streaming headers, six public answer branches, pre-header cancellation, and genuine network unavailability. |
+| Phase 4 Step 18 service-free regression | `COMPLETE_AND_VERIFIED` | Lint exited 0; 17 Vitest files/310 tests passed; the TypeScript/Vite build passed with 38 transformed modules; all 13 mocked Chromium tests passed. |
+| Phase 4 Step 18 backend/integrity boundary | `COMPLETE_AND_VERIFIED` | Compilation exited 0; 785 non-integration tests passed with 4 deselected and one known warning; 5 protected artifacts and 4 policies passed; dependency integrity passed; the 67-record store inspection passed; pre/post manifest and protected artifact hashes matched. |
+| Phase 4 Step 17 mocked Chromium suite | `COMPLETE_AND_VERIFIED` | `npm.cmd run test:e2e` passed 13 tests covering seven response branches, readiness states, retry, cancellation/stale suppression, safety/privacy, keyboard/axe accessibility, and 320px/1440px layout; its Vite endpoint was confirmed stopped afterward. |
+| Phase 4 Step 17 frontend regression commands | `COMPLETE_AND_VERIFIED` | `npm.cmd run test` passed 17 files and 310 tests; coverage was 96.23% statements/94.09% branches/98.9% functions/96.29% lines; lint exited 0; `tsc -b` and Vite 8.2.0 build passed. |
+| Phase 4 Step 17 backend regression boundary | `COMPLETE_AND_VERIFIED` | Compilation exited 0; 785 service-free tests passed with 4 integration tests deselected and one known warning; 5 protected artifacts matched; 4 policies validated; dependency integrity passed. |
+| Phase 4 Step 16 frontend release commands | `COMPLETE_AND_VERIFIED` | `npm.cmd run lint` exited 0; `npm.cmd run test` passed 17 files and 310 tests; the final `npm.cmd run build` passed `tsc -b` and Vite 8.2.0 with 38 modules transformed. |
+| Phase 4 Step 16 production artifact and preview audit | `COMPLETE_AND_VERIFIED` | Five ignored static assets passed type, path, size, source-map, indexed-reference, URL, and leakage checks; a custom-origin build embedded its configured origin exactly once; the final default build restored the documented origin; production preview returned HTTP 200 for the index and all referenced assets, then PID 32896 and its temporary logs were removed and port 4173 was confirmed closed. |
+| Phase 4 Step 16 backend regression boundary | `COMPLETE_AND_VERIFIED` | Compilation exited 0; 785 service-free tests passed with 4 integration tests deselected and one known warning; 5 protected artifacts matched; 4 policies validated; dependency integrity passed. |
 | `python -m pytest -q tests/test_api_models.py` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final focused run: `38 passed in 0.15s`; strict transport validation, readiness consistency, status mapping, and leakage assertions pass. |
 | `python -m compileall app/api` | `COMPLETE_AND_VERIFIED` | The first sandboxed launch was denied before Python started; the approved rerun exited 0. |
 | `python -m compileall app scripts tests` | `COMPLETE_AND_VERIFIED` | Phase 3 Step 2 final run exited 0. |
@@ -1436,6 +2178,23 @@ Working directory: `backend/`
   embedding-model digest, four policy source hashes/versions, four installed
   package versions, exact prefixes/strategies/settings, and distinct source
   document and chunk counts.
+- Phase 4 Step 16 is service-free. It built and inspected only ignored static
+  frontend output and briefly served that output through an agent-owned Vite
+  preview. It did not start FastAPI or Ollama, open Chroma, run classifier
+  inference, or execute integration-marked or Playwright tests.
+- Phase 4 Step 17 is service-free. Standalone Playwright started only its own
+  strict-port Vite process, fulfilled exact loopback API requests in Chromium,
+  and stopped that process after the suite. It did not start FastAPI or Ollama,
+  open Chroma, run classifier inference, or execute integration-marked tests.
+- Phase 4 Step 18 used the already-running approved Ollama service and active
+  store read-only; it did not start Ollama, pull models, rebuild or mutate
+  Chroma, change the manifest, or train/save the classifier. The agent started
+  and stopped only its recorded FastAPI and Vite processes.
+- Phase 4 Step 19 repeated the read-only Ollama/store checks, separately ran
+  all four integration-marked backend tests, and passed the eight-test live
+  Chromium suite against agent-owned FastAPI/Vite processes. It did not start
+  Ollama, pull models, rebuild/swap Chroma, edit the manifest, or train/save
+  the classifier. Exact service trees and temporary logs were removed.
 
 ## Known compatibility risks
 
@@ -1444,12 +2203,13 @@ Working directory: `backend/`
   configuration deprecation warning even though precomputed embeddings are
   supplied; this does not affect the verified result but should be reviewed
   when dependencies are upgraded.
-- During Step 13, Chroma 1.5.9 rewrote bytes in its HNSW
-  `data_level0.bin` during query-only client use even though no add, update,
-  upsert, delete, rebuild, activation, or manifest-write operation was called.
-  The manifest hash and logical 67-record collection remained unchanged and
-  passed post-run inspection. Filesystem-enforced read-only access should be
-  investigated when Chroma is upgraded.
+- During Step 13 and again during the Step 19 read-only release audit, Chroma
+  1.5.9 rewrote bytes in internal HNSW/SQLite runtime files during query-only
+  client use even though no add, update, upsert, delete, rebuild, activation,
+  or manifest-write operation was called. The file sizes, manifest hash, and
+  logical 67-record collection remained unchanged and passed inspection.
+  Filesystem-enforced read-only access should be investigated when Chroma is
+  upgraded.
 - Windows directory moves must be treated as staged and rollback-capable, not
   universally atomic.
 - The Nomic document and query prefixes must be applied exactly once.
@@ -1516,12 +2276,13 @@ Working directory: `backend/`
 
 ## Next incomplete step
 
-Phase 4 Step 9 — Streaming integration.
+No Phase 4 step remains incomplete. Phase 4 Steps 1–20 are complete and
+verified. Phase 5 is the next project phase and has not begun.
 
 ## Compact continuation handoff
 
 - Completed boundary: Phase 2 Steps 0–35, Phase 3 Steps 1–14, and Phase 4
-  Steps 1–8 are `COMPLETE_AND_VERIFIED`.
+  Steps 1–20 are `COMPLETE_AND_VERIFIED`.
 - Phase 4 Step 1 created only the current Vite React TypeScript scaffold and
   dependency/tooling baseline. It added no frontend product behavior.
 - The Vite 8 scaffold now uses the roadmap-required ESLint flat configuration;
@@ -1575,11 +2336,64 @@ Phase 4 Step 9 — Streaming integration.
   validation, Enter/Shift+Enter/IME behavior, and duplicate-submit disabling.
   It adds no dependency and changes no store, client, parser, or backend
   interface.
+- Phase 4 Step 9 adds `useChatController`, moves the guarded startup/store
+  subscription boundary out of `ChatPage`, and renders textual pending,
+  streaming, complete, interrupted, cancelled, and failed delivery states.
+  It reuses the existing parser/store invariants unchanged, announces stable
+  delivery transitions rather than individual chunks, and adds no dependency,
+  metadata/escalation UI, request-error control, cancellation/retry control,
+  persistence, API, parser, store, or backend change.
+- Step 9 passed 78 focused parser/store/component tests, all 228 frontend
+  tests, focused coverage, lint, TypeScript/Vite production build, the complete
+  785-test backend service-free boundary, read-only local prerequisites, and
+  concurrent FastAPI/Vite localhost probes. The browser runtime exposed no
+  browser backend, so no visual, keyboard, DevTools, screenshot, or Playwright
+  result is claimed. Every agent-owned service was stopped and both endpoints
+  were confirmed unreachable.
+- Phase 4 Step 10 adds reviewed status/risk/response-mode labels, safe
+  expandable request-reference details, and assertive human-assistance and
+  critical-priority presentation. It uses only previously validated public
+  metadata, never treats response mode or risk as frontend routing input, and
+  explicitly disclaims completed account actions and human handoffs.
+- Step 10 passed 44 focused component/axe tests, all 255 frontend tests,
+  focused coverage, lint, production build, the complete 785-test backend
+  service-free boundary, and real fully-ready CORS/SSE critical/high metadata
+  probes. No browser session was available, so visual/keyboard/DevTools and
+  Playwright results remain unclaimed; all agent-owned services and temporary
+  files were cleaned up.
+- Phase 4 Step 11 separates safe availability and request errors, adds guarded
+  readiness-then-liveness recovery, performs targeted post-failure health
+  rechecks without repeating chat, and adds the focused accessible
+  `RequestErrorNotice` with composer association and safe code/reference
+  details. It changes no API-client, parser, backend, dependency, or lockfile
+  contract and does not add Step 12 retry/cancel controls.
+- Step 11 passed 116 focused tests, all 279 frontend tests, focused coverage,
+  lint, production build, all 785 service-free backend tests, protected
+  baseline/policy/dependency checks, and concurrent fully-ready FastAPI/Vite
+  plus live 413/422 CORS/error probes. The browser runtime exposed no browser,
+  so visual/keyboard/DevTools and Playwright results remain unclaimed; all
+  agent-owned services and temporary files were cleaned up.
+- Phase 4 Step 12 adds visible `Cancel request`, retryable-error and cancelled-
+  turn Retry, and nonretryable `Edit and resend` controls. The store now
+  enforces the matching recovery boundary: retry reuses the same turn without
+  duplicating the customer bubble, edit restores the normalized text without
+  resubmitting, cancellation remains terminal, partial approved text remains
+  visible, and late callbacks remain inert. It changes no API/client/parser,
+  dependency, persistence, backend, policy, model, or Chroma contract.
+- Step 12 passed 78 focused store/component tests, all 288 frontend tests,
+  focused coverage, lint, production build, all 785 service-free backend
+  tests, protected baseline/policy/dependency checks, read-only local
+  prerequisites, concurrent fully-ready FastAPI/Vite probes, and real
+  deterministic CORS/SSE verification. Browser discovery returned no browser,
+  so visual/keyboard/DevTools and Playwright results remain unclaimed; mocked
+  browser E2E still begins at Step 17. Agent-owned PIDs 20536 and 20240 were
+  stopped, both endpoints were confirmed unreachable, and temporary files
+  were removed.
 - Step 8 passed 18 focused component/axe tests, all 220 frontend tests,
   TypeScript checking, clean lint, focused coverage, production build, Vite
   startup, and the complete 785-test backend service-free boundary. No browser
-  backend was available, so visual and manual keyboard inspection remain
-  unclaimed.
+  backend was available during Step 8, so visual and manual keyboard inspection
+  were unclaimed then; the Phase 4 closure audit now supplies that evidence.
 - Verification-process correction for future visible frontend steps: run the
   backend and Vite concurrently in separate terminals when prerequisites are
   available; do not conflate an unavailable browser-automation backend with an
@@ -1588,8 +2402,32 @@ Phase 4 Step 9 — Streaming integration.
   are free before handing the repository back for user verification.
 - The authoritative Phase 4 roadmap remains an untracked user file and must be
   preserved; no commit was created.
-- Next boundary: implement only Phase 4 Step 9 streaming integration; do not
-  begin Phase 4 Step 10 risk and escalation UI.
+- Phase 4 Step 15 adds exact public fetch/SSE fixtures and 12 production-
+  composition service-free tests without changing runtime interfaces,
+  dependencies, or Playwright configuration. All 310 frontend tests and the
+  complete service-free backend boundary pass.
+- Phase 4 Step 16 verifies the ignored deployable static bundle, default and
+  overridden API-origin replacement, exact frontend production dependency
+  tree, expected local assets, source-map absence, size boundary, sensitive-
+  content exclusion, and HTTP preview delivery. It changes no production
+  source, configuration, dependency, lockfile, public interface, or backend.
+- Phase 4 Step 18 adds the explicitly gated real-browser suite without a
+  runtime, backend, dependency, or lockfile change. The final eight live tests
+  pass against the real fully-ready two-process app, and all agent-owned
+  services and temporary files were removed afterward.
+- Phase 4 Step 19 changes only this status record. Its complete service-free,
+  artifact, dependency, protected-asset, read-only prerequisite, integration,
+  live Chromium, CORS, and cleanup matrix passes; the known Chroma 1.5.9
+  read-time internal-file rewrite recurred without a manifest or logical-store
+  change.
+- Phase 4 Step 20 changes only the root runbook and this status record. It
+  documents exact setup/startup/cleanup, verification tiers, the stable demo,
+  accessibility/privacy checks, limitations, and a conditional Phase 5
+  handoff without beginning Phase 5 work.
+- Phase 4 closure fixed one multi-response duplicate-landmark accessibility
+  defect, passed the full service-free/live and visual/keyboard matrix, and
+  removed all owned processes and temporary evidence files.
+- Next boundary: begin Phase 5 only as a separate explicitly authorized task.
 - Step 1 added `ApiSettings`, `load_api_settings(...)`,
   `validate_api_settings(...)`, module-level `api_settings`, exact
   `fastapi==0.140.13`/`starlette==1.3.1` pins, reviewed API environment
@@ -1738,7 +2576,21 @@ Phase 4 Step 9 — Streaming integration.
   and stopped the smoke-test process. The service-free suite passed 781 tests,
   the integration suite passed 4 tests, and the final strict live pipeline run
   passed all 7 probes after two safely contained nondeterministic generations.
-- Phase 3 is complete and Phase 4 Steps 1–8 are complete and verified. Phase 4
-  Step 9 streaming integration is next; preserve the protected
-  model, active store, Phase 2 safety boundary, ignored local environment, and
-  untracked user-supplied Phase 4 roadmap.
+- Phase 4 Step 13 adds stable focus recovery for validation, cancellation,
+  retry, editing, reconnect, and clear-confirmation flows; keeps the active
+  composer focusable/read-only; preserves stable polite delivery regions and
+  assertive critical/error regions without per-chunk announcements; tests
+  reduced-motion scrolling; and strengthens muted-text contrast. The complete
+  frontend, backend, and live integration suites pass. Real-browser keyboard
+  and visual contrast review remains unverified because no browser runtime was
+  available.
+- Phase 4 Step 14 removes the forced document width, uses dynamic viewport
+  minimum heights/mobile transcript bounds, allows nested panels and service
+  details to shrink/wrap, and stacks urgent controls on mobile. Four focused
+  responsive fixtures and all 298 frontend tests passed; Playwright viewport
+  overflow/manual-resize verification was outstanding then because no browser
+  runtime was available, and is now closed by the Phase 4 completion audit.
+- Phase 3 is complete and Phase 4 Steps 1–20 are complete and verified. Phase
+  5 has not begun;
+  preserve the protected model, active store, Phase 2 safety boundary, ignored
+  local environment, and untracked user-supplied Phase 4 roadmap.

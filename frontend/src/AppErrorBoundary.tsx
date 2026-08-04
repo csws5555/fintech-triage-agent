@@ -24,9 +24,9 @@ export class AppErrorBoundary extends Component<
     }
 
     return (
-      <main className="grid min-h-svh place-items-center bg-slate-950 px-4 py-10 text-slate-100">
+      <main className="grid min-h-dvh min-w-0 place-items-center bg-slate-950 px-4 py-8 text-slate-100 sm:py-10">
         <section
-          className="w-full max-w-lg rounded-3xl border border-rose-300/25 bg-slate-900 p-6 shadow-2xl shadow-slate-950/40 sm:p-8"
+          className="min-w-0 w-full max-w-lg rounded-3xl border border-rose-300/25 bg-slate-900 p-5 shadow-2xl shadow-slate-950/40 sm:p-8"
           role="alert"
           aria-labelledby="startup-error-title"
         >
@@ -44,7 +44,7 @@ export class AppErrorBoundary extends Component<
             page. No private error details are shown here.
           </p>
           <button
-            className="mt-6 min-h-11 rounded-xl bg-white px-5 py-2.5 font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
+            className="mt-6 min-h-11 w-full rounded-xl bg-white px-5 py-2.5 font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100 sm:w-auto"
             type="button"
             onClick={() => globalThis.location.reload()}
           >

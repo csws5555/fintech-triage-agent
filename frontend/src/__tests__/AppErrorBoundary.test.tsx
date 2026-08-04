@@ -30,7 +30,8 @@ describe('AppErrorBoundary', () => {
       ).toBeVisible()
       expect(
         screen.getByRole('button', { name: 'Reload page' }),
-      ).toBeVisible()
+      ).toHaveClass('w-full', 'sm:w-auto')
+      expect(screen.getByRole('main')).toHaveClass('min-h-dvh', 'min-w-0')
       expect(document.body).not.toHaveTextContent('C:\\private')
       expect(document.body).not.toHaveTextContent('internal diagnostics')
     } finally {

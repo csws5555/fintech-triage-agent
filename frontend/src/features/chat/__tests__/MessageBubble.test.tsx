@@ -1,10 +1,19 @@
 // @vitest-environment jsdom
 
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { ChatMessage } from '../chatTypes'
 import { MessageBubble } from '../components/MessageBubble'
+
+const METADATA = {
+  request_id: 'request-reference-123',
+  status: 'safety_guidance',
+  response_mode: 'deterministic_safety',
+  risk_level: 'high',
+  requires_human: true,
+} as const
 
 function message(
   overrides: Partial<ChatMessage> = {},
@@ -56,5 +65,134 @@ describe('MessageBubble', () => {
       'break-words',
       '[overflow-wrap:anywhere]',
     )
+  })
+
+  it('renders public metadata and required-human guidance only for an assistant response', () => {
+    const { rerender } = render(
+      <MessageBubble message={message({ metadata: METADATA })} />,
+    )
+
+    expect(screen.getAllByText('Safety guidance')[0]).toBeVisible()
+    expect(screen.getByText('High priority')).toBeVisible()
+    expect(
+      screen.getByRole('heading', { name: 'Human assistance required' }),
+    ).toBeVisible()
+    expect(screen.getByText('request-reference-123')).toBeInTheDocument()
+
+    rerender(
+      <MessageBubble
+        message={message({ role: 'user', metadata: METADATA })}
+      />,
+    )
+    expect(screen.queryByText('Safety guidance')).toBeNull()
+    expect(
+      screen.queryByRole('heading', { name: 'Human assistance required' }),
+    ).toBeNull()
+  })
+
+  it('does not show a human-assistance banner when requires_human is false', () => {
+    render(
+      <MessageBubble
+        message={message({
+          metadata: { ...METADATA, requires_human: false },
+        })}
+      />,
+    )
+
+    expect(screen.getAllByText('Safety guidance')[0]).toBeVisible()
+    expect(
+      screen.queryByRole('heading', { name: 'Human assistance required' }),
+    ).toBeNull()
+  })
+
+  it('uses one assertive announcement for combined critical and human-assistance metadata', () => {
+    render(
+      <MessageBubble
+        message={message({
+          metadata: { ...METADATA, risk_level: 'critical' },
+        })}
+      />,
+    )
+
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
+    expect(screen.getByRole('alert')).toHaveAccessibleName(
+      'Human assistance required',
+    )
+    expect(screen.getByText('Critical priority')).toBeVisible()
+  })
+
+  it.each([
+    ['pending', 'Processing your request.', 'true'],
+    ['streaming', 'Delivering an approved response.', 'true'],
+    ['complete', 'Response complete.', 'false'],
+    [
+      'interrupted',
+      'Incomplete response - delivery was interrupted.',
+      'false',
+    ],
+    ['cancelled', 'Response cancelled.', 'false'],
+    ['failed', 'Response unavailable.', 'false'],
+  ] as const)(
+    'renders the %s delivery state as visible text',
+    (delivery, label, busy) => {
+      render(<MessageBubble message={message({ delivery })} />)
+
+      expect(screen.getByRole('status')).toHaveTextContent(label)
+      expect(screen.getByLabelText('Support guide message')).toHaveAttribute(
+        'aria-busy',
+        busy,
+      )
+    },
+  )
+
+  it('announces delivery transitions without announcing streamed chunks', () => {
+    const { rerender } = render(
+      <MessageBubble
+        message={message({ content: 'First chunk', delivery: 'streaming' })}
+      />,
+    )
+    const liveRegion = screen.getByRole('status')
+
+    expect(liveRegion).toHaveTextContent('Delivering an approved response.')
+    expect(liveRegion).not.toHaveTextContent('First chunk')
+
+    rerender(
+      <MessageBubble
+        message={message({
+          content: 'First chunk and second chunk',
+          delivery: 'streaming',
+        })}
+      />,
+    )
+    expect(liveRegion).toHaveTextContent('Delivering an approved response.')
+    expect(liveRegion).not.toHaveTextContent('second chunk')
+  })
+
+  it('offers retry only for the selected cancelled response', async () => {
+    const user = userEvent.setup()
+    const onRetry = vi.fn()
+    const { rerender } = render(
+      <MessageBubble
+        message={message({ delivery: 'cancelled' })}
+        showRetry
+        onRetry={onRetry}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', { name: 'Retry cancelled request' }),
+    )
+    expect(onRetry).toHaveBeenCalledTimes(1)
+
+    rerender(
+      <MessageBubble
+        message={message({ delivery: 'failed' })}
+        showRetry
+        onRetry={onRetry}
+      />,
+    )
+    expect(
+      screen.queryByRole('button', { name: 'Retry cancelled request' }),
+    ).toBeNull()
   })
 })

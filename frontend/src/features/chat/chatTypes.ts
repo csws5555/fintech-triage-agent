@@ -69,6 +69,7 @@ export type ChatConversationState = Readonly<{
   nextExpectedSequence: number
   serverRequestId: string | null
   abortController: AbortController | null
+  availabilityError: ChatRequestError | null
   error: ChatRequestError | null
   retrySourceText: string | null
   retryTurnId: string | null

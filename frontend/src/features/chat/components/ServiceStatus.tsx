@@ -1,3 +1,5 @@
+import type { RefObject } from 'react'
+
 import type { ReadinessComponents } from '../../../api/contracts'
 import type { Availability } from '../chatTypes'
 
@@ -5,6 +7,7 @@ export type ServiceStatusProps = Readonly<{
   availability: Availability
   components: ReadinessComponents | null
   errorMessage: string | null
+  retryButtonRef?: RefObject<HTMLButtonElement | null>
   onRetry(): void
 }>
 
@@ -63,13 +66,14 @@ export function ServiceStatus({
   availability,
   components,
   errorMessage,
+  retryButtonRef,
   onRetry,
 }: ServiceStatusProps) {
   const presentation = STATUS_PRESENTATION[availability]
 
   return (
     <section
-      className={`rounded-2xl border p-4 ${presentation.panelClass}`}
+      className={`min-w-0 rounded-2xl border p-4 ${presentation.panelClass}`}
       aria-labelledby="service-status-title"
     >
       <div className="flex items-start gap-3" role="status" aria-live="polite">
@@ -102,11 +106,11 @@ export function ServiceStatus({
               const componentStatus = components[key]
               return (
                 <li
-                  className="flex items-center justify-between gap-4 text-slate-300"
+                  className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 text-slate-300"
                   key={key}
                 >
-                  <span>{label}</span>
-                  <span className="font-medium text-slate-100">
+                  <span className="min-w-0 break-words">{label}</span>
+                  <span className="break-words text-right font-medium text-slate-100">
                     {componentStatus === 'ready' ? 'Ready' : 'Unavailable'}
                   </span>
                 </li>
@@ -118,7 +122,8 @@ export function ServiceStatus({
 
       {availability === 'unavailable' ? (
         <button
-          className="mt-4 min-h-11 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-wait disabled:opacity-60"
+          ref={retryButtonRef}
+          className="mt-4 min-h-11 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
           type="button"
           onClick={onRetry}
         >

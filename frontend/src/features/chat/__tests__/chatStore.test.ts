@@ -27,6 +27,11 @@ const READY: ReadinessResponse = {
   },
 }
 
+const ALIVE: LivenessResponse = {
+  status: 'alive',
+  service: 'fintech-triage-api',
+}
+
 const METADATA: PublicAnswerMetadata = {
   request_id: 'server-request-id',
   status: 'answered',
@@ -46,6 +51,7 @@ type PendingStream = {
 type Harness = {
   store: ReturnType<typeof createChatStore>
   pending: PendingStream[]
+  checkLiveness: ReturnType<typeof vi.fn<ApiClient['checkLiveness']>>
   checkReadiness: ReturnType<typeof vi.fn<ApiClient['checkReadiness']>>
   streamChatMessage: ReturnType<
     typeof vi.fn<ApiClient['streamChatMessage']>
@@ -81,6 +87,9 @@ function createHarness(
   const checkReadiness = vi
     .fn<ApiClient['checkReadiness']>()
     .mockResolvedValue(readiness)
+  const checkLiveness = vi
+    .fn<ApiClient['checkLiveness']>()
+    .mockResolvedValue(ALIVE)
   const streamChatMessage = vi.fn<ApiClient['streamChatMessage']>(
     (message, handlers, options: ApiRequestOptions = {}) =>
       new Promise<CompletedStream>((resolve, reject) => {
@@ -100,9 +109,7 @@ function createHarness(
       }),
   )
   const apiClient: ApiClient = {
-    checkLiveness: vi.fn<ApiClient['checkLiveness']>() as (
-      options?: ApiRequestOptions,
-    ) => Promise<LivenessResponse>,
+    checkLiveness,
     checkReadiness,
     sendChatMessage: vi.fn<ApiClient['sendChatMessage']>() as (
       message: string,
@@ -117,6 +124,7 @@ function createHarness(
       idFactory: () => String(++nextId),
     }),
     pending,
+    checkLiveness,
     checkReadiness,
     streamChatMessage,
   }
@@ -179,6 +187,7 @@ describe('chat store availability', () => {
       requestPhase: 'idle',
       operationId: null,
       abortController: null,
+      availabilityError: null,
       error: null,
       retrySourceText: null,
     })
@@ -226,7 +235,7 @@ describe('chat store availability', () => {
     await expect(
       failed.store.getState().initializeAvailability(),
     ).resolves.toBe('unavailable')
-    expect(failed.store.getState().error).toEqual({
+    expect(failed.store.getState().availabilityError).toEqual({
       kind: 'invalid_response',
       code: 'unexpected_client_error',
       message: 'The request could not be completed.',
@@ -237,6 +246,55 @@ describe('chat store availability', () => {
     expect(JSON.stringify(failed.store.getState())).not.toContain(
       'private readiness exception',
     )
+    expect(failed.checkLiveness).toHaveBeenCalledTimes(1)
+    expect(failed.store.getState().error).toBeNull()
+  })
+
+  it('distinguishes a live backend whose readiness cannot be confirmed', async () => {
+    const harness = createHarness()
+    harness.checkReadiness.mockRejectedValueOnce(
+      new ApiClientError({
+        kind: 'network',
+        code: 'api_unreachable',
+        message: 'The local support service could not be reached.',
+        retryable: true,
+      }),
+    )
+
+    await expect(
+      harness.store.getState().initializeAvailability(),
+    ).resolves.toBe('unavailable')
+    expect(harness.checkLiveness).toHaveBeenCalledTimes(1)
+    expect(harness.store.getState().availabilityError).toMatchObject({
+      code: 'readiness_unconfirmed',
+      message:
+        'The local support service is running, but readiness could not be confirmed.',
+    })
+  })
+
+  it('uses a safe liveness failure when neither health endpoint is reachable', async () => {
+    const harness = createHarness()
+    harness.checkReadiness.mockRejectedValueOnce(
+      new Error('private readiness failure'),
+    )
+    harness.checkLiveness.mockRejectedValueOnce(
+      new ApiClientError({
+        kind: 'network',
+        code: 'api_unreachable',
+        message: 'The local support service could not be reached.',
+        retryable: true,
+      }),
+    )
+
+    await expect(
+      harness.store.getState().initializeAvailability(),
+    ).resolves.toBe('unavailable')
+    expect(harness.store.getState().availabilityError).toMatchObject({
+      kind: 'network',
+      code: 'api_unreachable',
+      message: 'The local support service could not be reached.',
+    })
+    expect(JSON.stringify(harness.store.getState())).not.toContain('private')
   })
 
   it('fails closed for a status/component combination a bad client lets through', async () => {
@@ -439,6 +497,56 @@ describe('chat store submission and streaming transitions', () => {
 })
 
 describe('chat store failure, cancellation, retry, and clear', () => {
+  it.each([
+    ['network', 'api_unreachable'],
+    ['network', 'stream_interrupted'],
+    ['http', 'classifier_unavailable'],
+    ['http', 'support_service_unavailable'],
+  ] as const)(
+    'rechecks readiness after a %s/%s request failure without retrying chat',
+    async (kind, code) => {
+      const harness = createHarness()
+      const { submission } = await beginSubmission(harness)
+      harness.pending[0]?.reject(
+        new ApiClientError({
+          kind,
+          code,
+          message: 'Approved request failure.',
+          retryable: true,
+          ...(kind === 'http' ? { status: 503 } : {}),
+        }),
+      )
+
+      await submission
+      expect(harness.checkReadiness).toHaveBeenCalledTimes(2)
+      expect(harness.streamChatMessage).toHaveBeenCalledTimes(1)
+      expect(harness.store.getState()).toMatchObject({
+        availability: 'ready',
+        requestPhase: 'failed',
+        error: { kind, code, message: 'Approved request failure.' },
+      })
+    },
+  )
+
+  it('does not recheck availability or retry chat after service busy', async () => {
+    const harness = createHarness()
+    const { submission } = await beginSubmission(harness)
+    harness.pending[0]?.reject(
+      new ApiClientError({
+        kind: 'http',
+        code: 'service_busy',
+        message: 'The support service is busy. Please try again.',
+        retryable: true,
+        status: 503,
+      }),
+    )
+
+    await submission
+    expect(harness.checkReadiness).toHaveBeenCalledTimes(1)
+    expect(harness.streamChatMessage).toHaveBeenCalledTimes(1)
+    expect(harness.store.getState().requestPhase).toBe('failed')
+  })
+
   it('preserves partial approved text as interrupted and stores only a safe error', async () => {
     const harness = createHarness()
     const { submission } = await beginSubmission(harness)
@@ -519,6 +627,37 @@ describe('chat store failure, cancellation, retry, and clear', () => {
     expect(harness.store.getState().messages[1]?.content).toBe('')
   })
 
+  it('keeps approved chunks incomplete when cancellation happens during delivery', async () => {
+    const harness = createHarness()
+    const { submission } = await beginSubmission(harness)
+    const operationId = activeOperation(harness.store.getState())
+    const pending = harness.pending[0]
+    if (pending === undefined) {
+      throw new Error('Missing pending stream in test harness.')
+    }
+    pending.handlers.onMetadata(METADATA)
+    pending.handlers.onChunk({
+      request_id: METADATA.request_id,
+      sequence: 0,
+      text: 'Approved partial text.',
+    })
+
+    expect(harness.store.getState().cancelRequest()).toBe(true)
+    await submission
+
+    expect(harness.store.getState().messages[1]).toMatchObject({
+      content: 'Approved partial text.',
+      delivery: 'cancelled',
+    })
+    expect(
+      harness.store.getState().completeStream(operationId, {
+        requestId: METADATA.request_id,
+        chunks: 1,
+      }),
+    ).toBe(false)
+    expect(harness.store.getState().requestPhase).toBe('cancelled')
+  })
+
   it('retries the same turn without duplicating the user message', async () => {
     const harness = createHarness()
     const { submission: firstSubmission } = await beginSubmission(harness)
@@ -564,6 +703,75 @@ describe('chat store failure, cancellation, retry, and clear', () => {
       content: 'Fresh answer.',
       delivery: 'complete',
     })
+  })
+
+  it('retries a cancellation in the same turn without duplicating the customer message', async () => {
+    const harness = createHarness()
+    const { submission: cancelledSubmission } = await beginSubmission(harness)
+    const originalIds = harness.store
+      .getState()
+      .messages.map((message) => message.id)
+
+    expect(harness.store.getState().cancelRequest()).toBe(true)
+    await cancelledSubmission
+
+    const retry = harness.store.getState().retryRequest()
+    await vi.waitFor(() => expect(harness.pending).toHaveLength(2))
+    expect(harness.store.getState().messages).toHaveLength(2)
+    expect(
+      harness.store.getState().messages.map((message) => message.id),
+    ).toEqual(originalIds)
+    expect(harness.store.getState().messages[1]).toMatchObject({
+      content: '',
+      delivery: 'pending',
+    })
+
+    deliverCompleteStream(harness, 1, ['Fresh answer after cancellation.'])
+    await expect(retry).resolves.toBe(true)
+    expect(harness.store.getState().messages[1]).toMatchObject({
+      content: 'Fresh answer after cancellation.',
+      delivery: 'complete',
+    })
+  })
+
+  it('restores a nonretryable request for editing and resends it as a new turn', async () => {
+    const harness = createHarness()
+    const { submission: failedSubmission } = await beginSubmission(harness)
+    harness.pending[0]?.reject(
+      new ApiClientError({
+        kind: 'invalid_response',
+        code: 'invalid_stream_response',
+        message:
+          'The local support service returned an invalid response stream.',
+        retryable: false,
+      }),
+    )
+    await failedSubmission
+
+    await expect(harness.store.getState().retryRequest()).resolves.toBe(false)
+    expect(harness.store.getState().editAndResendRequest()).toBe(true)
+    expect(harness.store.getState()).toMatchObject({
+      draft: 'When should my card arrive?',
+      requestPhase: 'idle',
+      error: null,
+      retrySourceText: null,
+      retryTurnId: null,
+    })
+
+    harness.store.getState().setDraft('When should my edited card arrive?')
+    const resend = harness.store.getState().submitMessage()
+    await vi.waitFor(() => expect(harness.pending).toHaveLength(2))
+    expect(harness.pending[1]?.message).toBe(
+      'When should my edited card arrive?',
+    )
+    expect(harness.store.getState().messages).toHaveLength(4)
+    expect(harness.store.getState().messages[2]).toMatchObject({
+      role: 'user',
+      content: 'When should my edited card arrive?',
+    })
+
+    deliverCompleteStream(harness, 1, ['Edited answer.'])
+    await expect(resend).resolves.toBe(true)
   })
 
   it('aborts active work before clearing all conversation memory', async () => {

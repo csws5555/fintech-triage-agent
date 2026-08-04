@@ -37,6 +37,7 @@ beforeEach(() => {
 afterEach(() => {
   scrollIntoView.mockReset()
   Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+  vi.unstubAllGlobals()
 })
 
 describe('MessageList', () => {
@@ -65,6 +66,24 @@ describe('MessageList', () => {
     rerender(<MessageList messages={MESSAGES} onClear={vi.fn()} />)
     expect(screen.getByLabelText('Support guide message')).toBeVisible()
     expect(scrollIntoView).toHaveBeenCalledTimes(2)
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      block: 'end',
+      behavior: 'smooth',
+    })
+  })
+
+  it('avoids smooth transcript scrolling when reduced motion is requested', () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true }),
+    )
+
+    render(<MessageList messages={MESSAGES} onClear={vi.fn()} />)
+
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: 'end',
+      behavior: 'auto',
+    })
   })
 
   it('requires confirmation before clearing the in-memory transcript', async () => {
@@ -78,12 +97,18 @@ describe('MessageList', () => {
     expect(screen.getByRole('alertdialog')).toHaveAccessibleName(
       'Clear this conversation?',
     )
+    expect(
+      screen.getByRole('button', { name: 'Clear messages' }),
+    ).toHaveFocus()
     expect(onClear).not.toHaveBeenCalled()
 
     await user.click(
       screen.getByRole('button', { name: 'Keep conversation' }),
     )
     expect(screen.queryByRole('alertdialog')).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Clear conversation' }),
+    ).toHaveFocus()
 
     await user.click(
       screen.getByRole('button', { name: 'Clear conversation' }),

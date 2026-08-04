@@ -34,6 +34,7 @@ export type ChatStoreActions = Readonly<{
   failRequest(operationId: string, error: unknown): boolean
   cancelRequest(): boolean
   retryRequest(): Promise<boolean>
+  editAndResendRequest(): boolean
   clearConversation(): void
 }>
 
@@ -63,6 +64,7 @@ const INITIAL_CONVERSATION_STATE: ChatConversationState = Object.freeze({
   nextExpectedSequence: 0,
   serverRequestId: null,
   abortController: null,
+  availabilityError: null,
   error: null,
   retrySourceText: null,
   retryTurnId: null,
@@ -109,6 +111,27 @@ function normalizedError(error: unknown): ChatRequestError {
     status: null,
     requestId: null,
   })
+}
+
+function readinessUnconfirmedError(): ChatRequestError {
+  return Object.freeze({
+    kind: 'network',
+    code: 'readiness_unconfirmed',
+    message:
+      'The local support service is running, but readiness could not be confirmed.',
+    retryable: true,
+    status: null,
+    requestId: null,
+  })
+}
+
+function shouldRecheckAvailability(error: ChatRequestError): boolean {
+  return (
+    error.kind === 'network' ||
+    (error.kind === 'http' &&
+      (error.code === 'classifier_unavailable' ||
+        error.code === 'support_service_unavailable'))
+  )
 }
 
 function availabilityFrom(readiness: ReadinessResponse): Availability {
@@ -161,6 +184,7 @@ export function createChatStore({
   if (
     typeof apiClient !== 'object' ||
     apiClient === null ||
+    typeof apiClient.checkLiveness !== 'function' ||
     typeof apiClient.checkReadiness !== 'function' ||
     typeof apiClient.streamChatMessage !== 'function' ||
     typeof idFactory !== 'function' ||
@@ -210,6 +234,63 @@ export function createChatStore({
         ...finishActiveOperation(),
       })
       return true
+    }
+
+    const checkAvailability = async (): Promise<Availability> => {
+      const checkVersion = ++availabilityCheckVersion
+      set({
+        availability: 'checking',
+        readinessComponents: null,
+        availabilityError: null,
+      })
+
+      try {
+        const readiness = await apiClient.checkReadiness()
+        if (checkVersion !== availabilityCheckVersion) {
+          return get().availability
+        }
+        const availability = availabilityFrom(readiness)
+        set({
+          availability,
+          readinessComponents: Object.freeze({
+            ...readiness.components,
+          }),
+          availabilityError: null,
+        })
+        return availability
+      } catch (readinessFailure: unknown) {
+        if (checkVersion !== availabilityCheckVersion) {
+          return get().availability
+        }
+
+        const safeReadinessError = normalizedError(readinessFailure)
+        try {
+          await apiClient.checkLiveness()
+        } catch (livenessFailure: unknown) {
+          if (checkVersion !== availabilityCheckVersion) {
+            return get().availability
+          }
+          set({
+            availability: 'unavailable',
+            readinessComponents: null,
+            availabilityError: normalizedError(livenessFailure),
+          })
+          return 'unavailable'
+        }
+
+        if (checkVersion !== availabilityCheckVersion) {
+          return get().availability
+        }
+        set({
+          availability: 'unavailable',
+          readinessComponents: null,
+          availabilityError:
+            safeReadinessError.kind === 'network'
+              ? readinessUnconfirmedError()
+              : safeReadinessError,
+        })
+        return 'unavailable'
+      }
     }
 
     const runOperation = async (
@@ -309,7 +390,15 @@ export function createChatStore({
         if (error instanceof ApiClientError && error.kind === 'cancelled') {
           cancelOperation(operationId)
         } else {
-          get().failRequest(operationId, error)
+          const failed = get().failRequest(operationId, error)
+          const requestError = get().error
+          if (
+            failed &&
+            requestError !== null &&
+            shouldRecheckAvailability(requestError)
+          ) {
+            await checkAvailability()
+          }
         }
       }
       return true
@@ -319,37 +408,7 @@ export function createChatStore({
       ...INITIAL_CONVERSATION_STATE,
 
       async initializeAvailability() {
-        const checkVersion = ++availabilityCheckVersion
-        set({
-          availability: 'checking',
-          readinessComponents: null,
-          error: null,
-        })
-        try {
-          const readiness = await apiClient.checkReadiness()
-          if (checkVersion !== availabilityCheckVersion) {
-            return get().availability
-          }
-          const availability = availabilityFrom(readiness)
-          set({
-            availability,
-            readinessComponents: Object.freeze({
-              ...readiness.components,
-            }),
-            error: null,
-          })
-          return availability
-        } catch (error: unknown) {
-          if (checkVersion !== availabilityCheckVersion) {
-            return get().availability
-          }
-          set({
-            availability: 'unavailable',
-            readinessComponents: null,
-            error: normalizedError(error),
-          })
-          return 'unavailable'
-        }
+        return checkAvailability()
       },
 
       setDraft(draft) {
@@ -526,14 +585,39 @@ export function createChatStore({
       async retryRequest() {
         const state = get()
         if (
-          (state.requestPhase !== 'failed' &&
-            state.requestPhase !== 'cancelled') ||
+          !(
+            state.requestPhase === 'cancelled' ||
+            (state.requestPhase === 'failed' &&
+              state.error?.retryable === true)
+          ) ||
           state.retrySourceText === null ||
           state.retryTurnId === null
         ) {
           return false
         }
         return runOperation(state.retrySourceText, state.retryTurnId)
+      },
+
+      editAndResendRequest() {
+        const state = get()
+        if (
+          state.requestPhase !== 'failed' ||
+          state.error?.retryable !== false ||
+          state.retrySourceText === null ||
+          state.retryTurnId === null ||
+          !canTransitionRequestPhase(state.requestPhase, 'idle')
+        ) {
+          return false
+        }
+        set({
+          draft: state.retrySourceText,
+          inputError: null,
+          requestPhase: 'idle',
+          error: null,
+          retrySourceText: null,
+          retryTurnId: null,
+        })
+        return true
       },
 
       clearConversation() {
